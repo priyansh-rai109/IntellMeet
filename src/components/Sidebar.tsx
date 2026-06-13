@@ -21,7 +21,7 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const userName = localStorage.getItem('user') || 'Arjun Sharma'
+  const userName = localStorage.getItem('userName') || 'Arjun Sharma'
   const role = localStorage.getItem('role') || 'Product Manager'
   const initials = localStorage.getItem('initials') || userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) || 'AS'
 

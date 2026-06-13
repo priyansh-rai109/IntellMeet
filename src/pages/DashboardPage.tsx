@@ -101,7 +101,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
-  const userName = localStorage.getItem('user') || 'Arjun Sharma'
+  const userName = localStorage.getItem('userName') || 'Arjun Sharma'
   const firstName = userName.split(' ')[0]
 
   return (

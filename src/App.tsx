@@ -5,6 +5,8 @@ import MeetingPage from './pages/MeetingPage'
 import PostMeetingPage from './pages/PostMeetingPage'
 import TasksPage from './pages/TasksPage'
 import AnalyticsPage from './pages/AnalyticsPage'
+import RegisterPage from './pages/RegisterPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
   return (
@@ -12,14 +14,16 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/meeting/:id" element={<MeetingPage />} />
-        <Route path="/post-meeting/:id" element={<PostMeetingPage />} />
-        <Route path="/tasks" element={<TasksPage />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/meeting/:id" element={<ProtectedRoute><MeetingPage /></ProtectedRoute>} />
+        <Route path="/post-meeting/:id" element={<ProtectedRoute><PostMeetingPage /></ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   )
 }
+
 
