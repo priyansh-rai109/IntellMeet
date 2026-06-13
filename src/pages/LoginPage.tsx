@@ -33,8 +33,7 @@ export default function LoginPage() {
 
       navigate('/dashboard')
     } catch (err: any) {
-      const errMsg = err.response?.data?.error || err.response?.data?.message || 'Authentication failed. Please check your credentials.'
-      setError(errMsg)
+      setError('Invalid email or password')
     } finally {
       setLoading(false)
     }
@@ -61,8 +60,7 @@ export default function LoginPage() {
       localStorage.setItem('initials', userObj.avatar || 'US')
       navigate('/dashboard')
     } catch (err: any) {
-      const errMsg = err.response?.data?.error || err.response?.data?.message || 'Demo authentication failed.'
-      setError(errMsg)
+      setError('Invalid email or password')
     } finally {
       setLoading(false)
     }
@@ -177,18 +175,14 @@ export default function LoginPage() {
             </form>
 
             {/* Note & Redirect Link to Register */}
-            <div className="mt-4 text-center space-y-2">
-              <p className="text-[11px] text-white/40">
-                New to IntellMeet? Please register a new account first:
-              </p>
+            <div className="mt-4 text-center">
               <button
                 type="button"
                 id="go-to-register-btn"
                 onClick={() => navigate('/register')}
-                className="flex items-center justify-center gap-1.5 mx-auto px-4 py-2 rounded-xl text-xs font-semibold text-purple-200 hover:text-white border border-purple-500/30 hover:border-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition-all duration-200 cursor-pointer shadow-sm"
+                className="text-xs text-purple-300 hover:text-white transition-colors underline cursor-pointer"
               >
-                <UserPlus size={12} />
-                Create New Account
+                Don't have account? Register
               </button>
             </div>
 
