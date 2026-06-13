@@ -21,12 +21,15 @@ export default function LoginPage() {
         password
       })
 
-      const { accessToken, user } = response.data
-      localStorage.setItem('token', accessToken)
-      localStorage.setItem('userName', user.name)
-      localStorage.setItem('userEmail', user.email)
-      localStorage.setItem('role', user.role || 'Team Member')
-      localStorage.setItem('initials', user.avatar || 'US')
+      const data = response.data || response
+      const tokenValue = data.token || data.accessToken
+      const userObj = data.user || {}
+      
+      localStorage.setItem('token', tokenValue)
+      localStorage.setItem('userName', userObj.name || '')
+      localStorage.setItem('userEmail', userObj.email || '')
+      localStorage.setItem('role', userObj.role || 'Team Member')
+      localStorage.setItem('initials', userObj.avatar || 'US')
 
       navigate('/dashboard')
     } catch (err: any) {
@@ -47,12 +50,15 @@ export default function LoginPage() {
         email: demoEmail,
         password: 'Demo2026'
       })
-      const { accessToken, user } = response.data
-      localStorage.setItem('token', accessToken)
-      localStorage.setItem('userName', user.name)
-      localStorage.setItem('userEmail', user.email)
-      localStorage.setItem('role', user.role || 'Team Member')
-      localStorage.setItem('initials', user.avatar || 'US')
+      const data = response.data || response
+      const tokenValue = data.token || data.accessToken
+      const userObj = data.user || {}
+
+      localStorage.setItem('token', tokenValue)
+      localStorage.setItem('userName', userObj.name || '')
+      localStorage.setItem('userEmail', userObj.email || '')
+      localStorage.setItem('role', userObj.role || 'Team Member')
+      localStorage.setItem('initials', userObj.avatar || 'US')
       navigate('/dashboard')
     } catch (err: any) {
       const errMsg = err.response?.data?.error || err.response?.data?.message || 'Demo authentication failed.'
@@ -61,6 +67,7 @@ export default function LoginPage() {
       setLoading(false)
     }
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #2D1B69 0%, #1a1a3e 40%, #0a2440 100%)' }}>

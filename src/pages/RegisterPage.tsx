@@ -31,7 +31,7 @@ export default function RegisterPage() {
         password
       })
 
-      setSuccess('Registration successful! Redirecting to Login page...')
+      setSuccess('Account created! Please login')
       setTimeout(() => {
         navigate('/login')
       }, 1500)
