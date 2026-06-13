@@ -21,9 +21,9 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const userName = localStorage.getItem('userName') || 'Arjun Sharma'
+  const userName = localStorage.getItem('userName') || 'User'
   const role = localStorage.getItem('role') || 'Product Manager'
-  const initials = localStorage.getItem('initials') || userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) || 'AS'
+  const initials = localStorage.getItem('initials') || (userName !== 'User' ? userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) : 'U') || 'U'
 
   const handleLogout = () => {
     localStorage.clear()
@@ -68,20 +68,23 @@ export default function Sidebar() {
 
       {/* User */}
       <div className="px-4 py-4 border-t border-white/10">
-        <div 
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-500/10 transition-all cursor-pointer group"
-          title="Click to Log Out"
-        >
+        <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all group">
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
             style={{ background: 'linear-gradient(135deg, #7C3AED, #06B6D4)' }}>
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-white truncate group-hover:text-red-300 transition-colors">{userName}</div>
-            <div className="text-xs text-purple-300/60 truncate group-hover:text-red-400/60 transition-colors">{role}</div>
+            <div className="text-sm font-semibold text-white truncate">{userName}</div>
+            <div className="text-xs text-purple-300/60 truncate">{role}</div>
           </div>
-          <LogOut size={14} className="text-purple-300/40 group-hover:text-red-400 transition-colors flex-shrink-0" />
+          <button
+            id="logout-btn"
+            onClick={handleLogout}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-purple-300/40 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
+            title="Log Out"
+          >
+            <LogOut size={14} />
+          </button>
         </div>
       </div>
     </aside>

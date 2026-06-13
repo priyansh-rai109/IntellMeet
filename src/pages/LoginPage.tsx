@@ -33,7 +33,7 @@ export default function LoginPage() {
 
       navigate('/dashboard')
     } catch (err: any) {
-      setError('Invalid email or password')
+      setError('Invalid credentials')
     } finally {
       setLoading(false)
     }
@@ -60,7 +60,7 @@ export default function LoginPage() {
       localStorage.setItem('initials', userObj.avatar || 'US')
       navigate('/dashboard')
     } catch (err: any) {
-      setError('Invalid email or password')
+      setError('Invalid credentials')
     } finally {
       setLoading(false)
     }
@@ -176,13 +176,14 @@ export default function LoginPage() {
 
             {/* Note & Redirect Link to Register */}
             <div className="mt-4 text-center">
+              <span className="text-xs text-white/50">Don't have account? </span>
               <button
                 type="button"
                 id="go-to-register-btn"
                 onClick={() => navigate('/register')}
-                className="text-xs text-purple-300 hover:text-white transition-colors underline cursor-pointer"
+                className="text-xs text-purple-300 hover:text-white transition-colors underline cursor-pointer font-semibold"
               >
-                Don't have account? Register
+                Register here
               </button>
             </div>
 
