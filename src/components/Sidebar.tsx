@@ -13,13 +13,22 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Video, label: 'Meetings', path: '/meeting/1' },
   { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
-  { icon: BarChart3, label: 'Analytics', path: '/dashboard' },
+  { icon: BarChart3, label: 'Analytics', path: '/analytics' },
   { icon: Settings, label: 'Settings', path: '/dashboard' },
 ]
 
 export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
+
+  const userName = localStorage.getItem('user') || 'Arjun Sharma'
+  const role = localStorage.getItem('role') || 'Product Manager'
+  const initials = localStorage.getItem('initials') || userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) || 'AS'
+
+  const handleLogout = () => {
+    localStorage.clear()
+    navigate('/login')
+  }
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 flex flex-col z-40" style={{ background: '#1E1B4B' }}>
@@ -42,7 +51,7 @@ export default function Sidebar() {
             <button
               key={label}
               onClick={() => navigate(path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 group ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 group cursor-pointer ${
                 isActive
                   ? 'text-white font-semibold'
                   : 'text-purple-200/70 hover:text-white hover:bg-white/5'
@@ -59,16 +68,20 @@ export default function Sidebar() {
 
       {/* User */}
       <div className="px-4 py-4 border-t border-white/10">
-        <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
+        <div 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-500/10 transition-all cursor-pointer group"
+          title="Click to Log Out"
+        >
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
             style={{ background: 'linear-gradient(135deg, #7C3AED, #06B6D4)' }}>
-            AS
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-white truncate">Arjun Sharma</div>
-            <div className="text-xs text-purple-300/60 truncate">Product Manager</div>
+            <div className="text-sm font-semibold text-white truncate group-hover:text-red-300 transition-colors">{userName}</div>
+            <div className="text-xs text-purple-300/60 truncate group-hover:text-red-400/60 transition-colors">{role}</div>
           </div>
-          <LogOut size={14} className="text-purple-300/40 group-hover:text-purple-300 transition-colors flex-shrink-0" />
+          <LogOut size={14} className="text-purple-300/40 group-hover:text-red-400 transition-colors flex-shrink-0" />
         </div>
       </div>
     </aside>

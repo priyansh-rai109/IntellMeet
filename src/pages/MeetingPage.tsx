@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Mic,
   MicOff,
@@ -16,12 +16,43 @@ import {
   MoreVertical,
 } from 'lucide-react'
 
-const participants = [
-  { name: 'Priya Mehta', initials: 'PM', color: '#06B6D4', status: null },
-  { name: 'Rahul Verma', initials: 'RV', color: '#F59E0B', status: 'MUTED' },
-  { name: 'Sneha Patel', initials: 'SP', color: '#10B981', status: null },
-  { name: 'Vikram Nair', initials: 'VN', color: '#EF4444', status: 'VIDEO OFF' },
-]
+interface Participant {
+  name: string
+  initials: string
+  color: string
+  status: string | null
+}
+
+const meetingsData: Record<string, { title: string; participants: Participant[] }> = {
+  '1': {
+    title: 'Q3 Product Roadmap',
+    participants: [
+      { name: 'Priya Mehta', initials: 'PM', color: '#06B6D4', status: null },
+      { name: 'Rahul Verma', initials: 'RV', color: '#F59E0B', status: 'MUTED' },
+      { name: 'Sneha Patel', initials: 'SP', color: '#10B981', status: null },
+      { name: 'Vikram Nair', initials: 'VN', color: '#EF4444', status: 'VIDEO OFF' },
+    ]
+  },
+  '2': {
+    title: 'Client Onboarding - TechCorp',
+    participants: [
+      { name: 'Sarah Jenkins', initials: 'SJ', color: '#7C3AED', status: null },
+      { name: 'David Miller', initials: 'DM', color: '#F59E0B', status: 'MUTED' },
+      { name: 'Rahul Verma', initials: 'RV', color: '#06B6D4', status: null },
+      { name: 'Arjun Sharma', initials: 'AS', color: '#10B981', status: 'VIDEO OFF' },
+    ]
+  },
+  '3': {
+    title: 'Sprint Planning Week 12',
+    participants: [
+      { name: 'Sneha Patel', initials: 'SP', color: '#10B981', status: null },
+      { name: 'Priya Mehta', initials: 'PM', color: '#06B6D4', status: 'MUTED' },
+      { name: 'Vikram Nair', initials: 'VN', color: '#EF4444', status: null },
+      { name: 'Amit Kumar', initials: 'AK', color: '#7C3AED', status: 'VIDEO OFF' },
+      { name: 'Rohan Gupta', initials: 'RG', color: '#F59E0B', status: null },
+    ]
+  }
+}
 
 const initialMessages = [
   { id: 1, sender: 'Priya Mehta', initials: 'PM', color: '#06B6D4', text: 'Can we move the deadline to Friday?', isAI: false, time: '2:38 PM' },
@@ -44,6 +75,13 @@ function useTimer(initial = 2537) {
 
 export default function MeetingPage() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  
+  const currentId = id || '1'
+  const meetingInfo = meetingsData[currentId] || meetingsData['1']
+  const meetingTitle = meetingInfo.title
+  const participants = meetingInfo.participants
+
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
   const [sharing, setSharing] = useState(false)
@@ -80,13 +118,13 @@ export default function MeetingPage() {
       <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#161B22' }}>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer" onClick={() => navigate('/dashboard')} style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}>
               <Bot size={16} className="text-white" />
             </div>
-            <span className="text-white font-bold text-sm">IntellMeet</span>
+            <span className="text-white font-bold text-sm cursor-pointer hover:opacity-85" onClick={() => navigate('/dashboard')}>IntellMeet</span>
           </div>
           <div className="h-4 w-px bg-white/10" />
-          <span className="text-white font-semibold text-sm truncate max-w-48">Q3 Product Roadmap</span>
+          <span className="text-white font-semibold text-sm truncate max-w-48">{meetingTitle}</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -113,7 +151,7 @@ export default function MeetingPage() {
           {/* Participant count */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
             <Users size={12} className="text-slate-400" />
-            <span className="text-white text-xs font-semibold">8</span>
+            <span className="text-white text-xs font-semibold">{participants.length + 1}</span>
           </div>
 
           <div className="flex items-center gap-1 ml-1">
@@ -229,7 +267,7 @@ export default function MeetingPage() {
               />
               <button
                 type="submit"
-                className="p-2 rounded-xl transition-all hover:opacity-80"
+                className="p-2 rounded-xl transition-all hover:opacity-80 cursor-pointer"
                 style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
               >
                 <Send size={14} className="text-white" />
@@ -277,7 +315,7 @@ export default function MeetingPage() {
             key={id}
             id={id}
             onClick={onClick}
-            className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 min-w-16"
+            className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 min-w-16 cursor-pointer"
             style={{ background: active ? activeColor : inactiveColor }}
           >
             <Icon size={20} className={activeIcon} />
@@ -290,8 +328,8 @@ export default function MeetingPage() {
         {/* Leave */}
         <button
           id="btn-leave"
-          onClick={() => navigate('/post-meeting/1')}
-          className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
+          onClick={() => navigate('/post-meeting/' + currentId)}
+          className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
           style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)' }}
         >
           <PhoneOff size={20} className="text-red-400" />

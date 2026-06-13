@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import {
   Bot,
@@ -15,50 +15,101 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
-const actionItems = [
-  {
-    task: 'Send updated design mockups',
-    assignee: 'Rahul Verma',
-    initials: 'RV',
-    color: '#F59E0B',
-    due: 'Jun 13',
-    priority: 'HIGH',
-    done: false,
-  },
-  {
-    task: 'Prepare Q3 budget breakdown',
-    assignee: 'Sneha Patel',
-    initials: 'SP',
-    color: '#10B981',
-    due: 'Jun 14',
-    priority: 'MEDIUM',
-    done: false,
-  },
-  {
-    task: 'Schedule client demo',
-    assignee: 'Priya Mehta',
-    initials: 'PM',
-    color: '#06B6D4',
-    due: 'Jun 15',
-    priority: 'HIGH',
-    done: false,
-  },
-  {
-    task: 'Update project timeline doc',
-    assignee: 'Arjun Sharma',
-    initials: 'AS',
-    color: '#7C3AED',
-    due: 'Jun 16',
-    priority: 'LOW',
-    done: true,
-  },
-]
+interface ActionItem {
+  task: string
+  assignee: string
+  initials: string
+  color: string
+  due: string
+  priority: string
+  done: boolean
+}
 
-const highlights = [
-  { quote: 'We need to finalize the API documentation before the client demo next week.', speaker: 'Arjun Sharma', time: '00:12:34' },
-  { quote: 'The budget approval has been confirmed by the finance team.', speaker: 'Sneha Patel', time: '00:38:21' },
-  { quote: "Let's move forward with the new design system across all platforms.", speaker: 'Rahul Verma', time: '01:02:15' },
-]
+interface Highlight {
+  quote: string
+  speaker: string
+  time: string
+}
+
+interface MeetingData {
+  title: string
+  date: string
+  duration: string
+  participantsText: string
+  summary: string[]
+  actionItems: ActionItem[]
+  highlights: Highlight[]
+}
+
+const meetingsData: Record<string, MeetingData> = {
+  '1': {
+    title: 'Q3 Product Roadmap',
+    date: 'June 11, 2026',
+    duration: '1h 24m',
+    participantsText: '8 Participants',
+    summary: [
+      'Team agreed to push Q3 launch date to August 15th due to additional feature scope and testing requirements.',
+      'Mobile app redesign approved pending final review from design lead scheduled for June 18th.',
+      'Marketing budget increased by 20% for Q3 campaign — Finance team to process by end of week.',
+      'Weekly syncs moved from Thursdays to Tuesdays at 3 PM starting next week.',
+    ],
+    actionItems: [
+      { task: 'Send updated design mockups', assignee: 'Rahul Verma', initials: 'RV', color: '#F59E0B', due: 'Jun 13', priority: 'HIGH', done: false },
+      { task: 'Prepare Q3 budget breakdown', assignee: 'Sneha Patel', initials: 'SP', color: '#10B981', due: 'Jun 14', priority: 'MEDIUM', done: false },
+      { task: 'Schedule client demo', assignee: 'Priya Mehta', initials: 'PM', color: '#06B6D4', due: 'Jun 15', priority: 'HIGH', done: false },
+      { task: 'Update project timeline doc', assignee: 'Arjun Sharma', initials: 'AS', color: '#7C3AED', due: 'Jun 16', priority: 'LOW', done: true },
+    ],
+    highlights: [
+      { quote: 'We need to finalize the API documentation before the client demo next week.', speaker: 'Arjun Sharma', time: '00:12:34' },
+      { quote: 'The budget approval has been confirmed by the finance team.', speaker: 'Sneha Patel', time: '00:38:21' },
+      { quote: "Let's move forward with the new design system across all platforms.", speaker: 'Rahul Verma', time: '01:02:15' },
+    ]
+  },
+  '2': {
+    title: 'Client Onboarding - TechCorp',
+    date: 'June 12, 2026',
+    duration: '45m',
+    participantsText: '5 Participants',
+    summary: [
+      'Reviewed TechCorp onboarding checklist and successfully configured their initial sandbox environment.',
+      'Identified custom SSO configuration requirements for their enterprise domain integration.',
+      'Set up training sessions for the TechCorp administrator team next Tuesday.',
+      'Assigned dedicated account manager to handle their migration phase.',
+    ],
+    actionItems: [
+      { task: 'Provide custom SSO configuration guide', assignee: 'Rahul Verma', initials: 'RV', color: '#F59E0B', due: 'Jun 15', priority: 'HIGH', done: false },
+      { task: 'Follow up on signed SLA agreement', assignee: 'Sarah Jenkins', initials: 'SJ', color: '#7C3AED', due: 'Jun 16', priority: 'MEDIUM', done: false },
+      { task: 'Schedule training session for admins', assignee: 'David Miller', initials: 'DM', color: '#06B6D4', due: 'Jun 14', priority: 'HIGH', done: true },
+      { task: 'Create TechCorp support Slack channel', assignee: 'Arjun Sharma', initials: 'AS', color: '#10B981', due: 'Jun 13', priority: 'LOW', done: true },
+    ],
+    highlights: [
+      { quote: 'We want to ensure our login flows are completely secured with SAML SSO.', speaker: 'Sarah Jenkins', time: '00:08:15' },
+      { quote: 'Our migration needs to be completed before the end of the month.', speaker: 'David Miller', time: '00:22:40' },
+    ]
+  },
+  '3': {
+    title: 'Sprint Planning Week 12',
+    date: 'June 13, 2026',
+    duration: '1h 05m',
+    participantsText: '12 Participants',
+    summary: [
+      'Reviewed sprint velocity and finalized commitment for Sprint 12 target scope.',
+      'Identified backend API blocking issues for the task board and resolved assignees.',
+      'Committed to resolving 5 high-priority bugs in the authentication middleware.',
+      'Scheduled mid-sprint review for Friday morning.',
+    ],
+    actionItems: [
+      { task: 'Fix authentication middleware validation', assignee: 'Sneha Patel', initials: 'SP', color: '#10B981', due: 'Jun 18', priority: 'HIGH', done: false },
+      { task: 'Implement drag-and-drop on task board', assignee: 'Priya Mehta', initials: 'PM', color: '#06B6D4', due: 'Jun 19', priority: 'HIGH', done: false },
+      { task: 'Update staging environment configurations', assignee: 'Vikram Nair', initials: 'VN', color: '#EF4444', due: 'Jun 15', priority: 'MEDIUM', done: true },
+      { task: 'Write unit tests for task API endpoint', assignee: 'Amit Kumar', initials: 'AK', color: '#7C3AED', due: 'Jun 16', priority: 'LOW', done: true },
+    ],
+    highlights: [
+      { quote: 'We must focus on stabilization this sprint to resolve the memory leak issues.', speaker: 'Sneha Patel', time: '00:05:10' },
+      { quote: 'The drag-and-drop feature needs to feel extremely smooth and premium.', speaker: 'Priya Mehta', time: '00:18:45' },
+    ]
+  }
+}
 
 const priorityConfig: Record<string, { color: string; bg: string; label: string }> = {
   HIGH: { color: '#EF4444', bg: 'rgba(239,68,68,0.1)', label: 'HIGH' },
@@ -68,8 +119,13 @@ const priorityConfig: Record<string, { color: string; bg: string; label: string 
 
 export default function PostMeetingPage() {
   const navigate = useNavigate()
+  const { id } = useParams()
+
+  const currentId = id || '1'
+  const meetingData = meetingsData[currentId] || meetingsData['1']
+
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>(
-    actionItems.reduce((acc, item, i) => ({ ...acc, [i]: item.done }), {})
+    meetingData.actionItems.reduce((acc, item, i) => ({ ...acc, [i]: item.done }), {})
   )
 
   const toggleItem = (i: number) => {
@@ -87,7 +143,7 @@ export default function PostMeetingPage() {
             <button
               id="back-to-dashboard"
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
             >
               <ChevronLeft size={16} />
               Back to Dashboard
@@ -101,7 +157,7 @@ export default function PostMeetingPage() {
           <div className="flex items-center gap-2">
             <button
               id="export-pdf-btn"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-80 border"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-85 border cursor-pointer"
               style={{ borderColor: '#7C3AED', color: '#7C3AED' }}
             >
               <Download size={14} />
@@ -109,7 +165,7 @@ export default function PostMeetingPage() {
             </button>
             <button
               id="share-btn"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
             >
               <Share2 size={14} />
@@ -121,19 +177,19 @@ export default function PostMeetingPage() {
         <div className="px-8 py-6 max-w-4xl mx-auto space-y-6 page-enter">
           {/* Meeting Header */}
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">Q3 Product Roadmap — Meeting Summary</h1>
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">{meetingData.title} — Meeting Summary</h1>
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
               <span className="flex items-center gap-1.5">
                 <Calendar size={14} />
-                June 11, 2026
+                {meetingData.date}
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock size={14} />
-                Duration: 1h 24m
+                Duration: {meetingData.duration}
               </span>
               <span className="flex items-center gap-1.5">
                 <Users size={14} />
-                8 Participants
+                {meetingData.participantsText}
               </span>
             </div>
           </div>
@@ -151,12 +207,7 @@ export default function PostMeetingPage() {
                 </div>
               </div>
               <ul className="space-y-3">
-                {[
-                  'Team agreed to push Q3 launch date to August 15th due to additional feature scope and testing requirements.',
-                  'Mobile app redesign approved pending final review from design lead scheduled for June 18th.',
-                  'Marketing budget increased by 20% for Q3 campaign — Finance team to process by end of week.',
-                  'Weekly syncs moved from Thursdays to Tuesdays at 3 PM starting next week.',
-                ].map((point, i) => (
+                {meetingData.summary.map((point, i) => (
                   <li key={i} className="flex gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)', fontSize: '10px' }}>
                       {i + 1}
@@ -176,18 +227,18 @@ export default function PostMeetingPage() {
                 <h2 className="font-bold text-slate-800">Action Items</h2>
               </div>
               <span className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED' }}>
-                {Object.values(checkedItems).filter(Boolean).length}/{actionItems.length} Complete
+                {Object.values(checkedItems).filter(Boolean).length}/{meetingData.actionItems.length} Complete
               </span>
             </div>
             <div className="divide-y divide-slate-50">
-              {actionItems.map((item, i) => {
-                const pc = priorityConfig[item.priority]
+              {meetingData.actionItems.map((item, i) => {
+                const pc = priorityConfig[item.priority] || priorityConfig['MEDIUM']
                 return (
                   <div key={i} className={`px-6 py-4 flex items-center gap-4 hover:bg-slate-50/60 transition-colors ${checkedItems[i] ? 'opacity-60' : ''}`}>
                     <button
                       id={`action-item-${i}`}
                       onClick={() => toggleItem(i)}
-                      className="flex-shrink-0 transition-transform hover:scale-110"
+                      className="flex-shrink-0 transition-transform hover:scale-110 cursor-pointer"
                     >
                       {checkedItems[i]
                         ? <CheckSquare size={20} style={{ color: '#7C3AED' }} />
@@ -225,7 +276,7 @@ export default function PostMeetingPage() {
               <h2 className="font-bold text-slate-800">Transcript Highlights</h2>
             </div>
             <div className="p-6 space-y-4">
-              {highlights.map((h, i) => (
+              {meetingData.highlights.map((h, i) => (
                 <div key={i} className="flex gap-4 p-4 rounded-xl hover:bg-slate-50/80 transition-colors" style={{ borderLeft: '3px solid #7C3AED' }}>
                   <AlertCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: '#A78BFA' }} />
                   <div>
@@ -244,7 +295,7 @@ export default function PostMeetingPage() {
           <div className="flex justify-center pb-6">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90 hover:scale-[1.02] shadow-lg"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90 hover:scale-[1.02] shadow-lg cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
             >
               <ChevronLeft size={16} />

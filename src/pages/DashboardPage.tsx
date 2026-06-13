@@ -69,7 +69,7 @@ const meetings = [
     status: 'SOON',
     statusColor: '#F59E0B',
     statusBg: 'rgba(245,158,11,0.1)',
-    path: '/meeting/1',
+    path: '/meeting/2',
   },
   {
     title: 'Sprint Planning Week 12',
@@ -78,7 +78,7 @@ const meetings = [
     status: 'SCHEDULED',
     statusColor: '#3B82F6',
     statusBg: 'rgba(59,130,246,0.1)',
-    path: '/meeting/1',
+    path: '/meeting/3',
   },
   {
     title: 'Design Review - Mobile App',
@@ -101,6 +101,9 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
+  const userName = localStorage.getItem('user') || 'Arjun Sharma'
+  const firstName = userName.split(' ')[0]
+
   return (
     <div className="flex min-h-screen" style={{ background: '#F8FAFC' }}>
       <Sidebar />
@@ -110,13 +113,13 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="sticky top-0 z-30 px-8 py-4 flex items-center justify-between border-b border-slate-200/80" style={{ background: 'rgba(248,250,252,0.9)', backdropFilter: 'blur(12px)' }}>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">Good Morning, Arjun 👋</h1>
+            <h1 className="text-xl font-bold text-slate-800">Good Morning, {firstName} 👋</h1>
             <p className="text-sm text-slate-500 mt-0.5">{today}</p>
           </div>
           <button
             id="new-meeting-btn"
             onClick={() => navigate('/meeting/1')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] shadow-lg cursor-pointer"
             style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
           >
             <Plus size={16} />
@@ -235,12 +238,12 @@ export default function DashboardPage() {
             {[
               { label: 'My Tasks', desc: '3 pending action items', color: '#7C3AED', path: '/tasks' },
               { label: 'Past Meetings', desc: '12 recordings available', color: '#06B6D4', path: '/post-meeting/1' },
-              { label: 'Team Analytics', desc: 'View productivity insights', color: '#10B981', path: '/dashboard' },
+              { label: 'Team Analytics', desc: 'View productivity insights', color: '#10B981', path: '/analytics' },
             ].map(({ label, desc, color, path }) => (
               <button
                 key={label}
                 onClick={() => navigate(path)}
-                className="text-left p-4 rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 group"
+                className="text-left p-4 rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-sm text-slate-800">{label}</span>

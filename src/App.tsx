@@ -4,6 +4,7 @@ import DashboardPage from './pages/DashboardPage'
 import MeetingPage from './pages/MeetingPage'
 import PostMeetingPage from './pages/PostMeetingPage'
 import TasksPage from './pages/TasksPage'
+import AnalyticsPage from './pages/AnalyticsPage'
 
 export default function App() {
   return (
@@ -15,8 +16,10 @@ export default function App() {
         <Route path="/meeting/:id" element={<MeetingPage />} />
         <Route path="/post-meeting/:id" element={<PostMeetingPage />} />
         <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   )
 }
+

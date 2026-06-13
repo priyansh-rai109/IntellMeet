@@ -1,32 +1,83 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bot, Mail, Lock, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react'
+import { Bot, Mail, Lock, ArrowRight, Sparkles, Shield, Zap, User as UserIcon } from 'lucide-react'
+import axios from 'axios'
+import API_URL from '../config/api'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [isRegister, setIsRegister] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
-    if (email === 'demo@intellmeet.ai' && password === 'demo123') {
-      navigate('/dashboard')
-    } else if (email && password) {
-      navigate('/dashboard')
-    } else {
-      setError('Please enter your credentials.')
+
+    try {
+      if (isRegister) {
+        if (!name.trim()) {
+          setError('Name is required.')
+          setLoading(false)
+          return
+        }
+        const response = await axios.post(`${API_URL}/auth/register`, {
+          name: name.trim(),
+          email: email.trim(),
+          password
+        })
+        const { accessToken, user } = response.data
+        localStorage.setItem('token', accessToken)
+        localStorage.setItem('user', user.name)
+        localStorage.setItem('role', user.role || 'Team Member')
+        localStorage.setItem('initials', user.avatar || 'US')
+        navigate('/dashboard')
+      } else {
+        const response = await axios.post(`${API_URL}/auth/login`, {
+          email: email.trim(),
+          password
+        })
+        const { accessToken, user } = response.data
+        localStorage.setItem('token', accessToken)
+        localStorage.setItem('user', user.name)
+        localStorage.setItem('role', user.role || 'Team Member')
+        localStorage.setItem('initials', user.avatar || 'US')
+        navigate('/dashboard')
+      }
+    } catch (err: any) {
+      const errMsg = err.response?.data?.error || err.response?.data?.message || 'Authentication failed. Please check your credentials.'
+      setError(errMsg)
+    } finally {
       setLoading(false)
     }
   }
 
-  const fillDemo = () => {
-    setEmail('demo@intellmeet.ai')
+  const fillAndSubmitDemo = async (demoEmail: string) => {
+    setEmail(demoEmail)
     setPassword('demo123')
+    setError('')
+    setLoading(true)
+    try {
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        email: demoEmail,
+        password: 'demo123'
+      })
+      const { accessToken, user } = response.data
+      localStorage.setItem('token', accessToken)
+      localStorage.setItem('user', user.name)
+      localStorage.setItem('role', user.role || 'Team Member')
+      localStorage.setItem('initials', user.avatar || 'US')
+      navigate('/dashboard')
+    } catch (err: any) {
+      const errMsg = err.response?.data?.error || err.response?.data?.message || 'Demo authentication failed.'
+      setError(errMsg)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -70,11 +121,32 @@ export default function LoginPage() {
                 <Bot size={32} className="text-white" />
               </div>
               <h1 className="text-2xl font-bold text-white mb-1">IntellMeet</h1>
-              <p className="text-sm font-medium" style={{ color: '#A78BFA' }}>AI-Powered Meeting Intelligence</p>
+              <p className="text-sm font-medium" style={{ color: '#A78BFA' }}>
+                {isRegister ? 'Create Your Account' : 'AI-Powered Meeting Intelligence'}
+              </p>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSignIn} className="space-y-4">
+            <form onSubmit={handleAuth} className="space-y-4">
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Name</label>
+                  <div className="relative">
+                    <UserIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+                    <input
+                      id="name-input"
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="Your Full Name"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-500/50"
+                      style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Email</label>
                 <div className="relative">
@@ -87,6 +159,7 @@ export default function LoginPage() {
                     placeholder="you@company.com"
                     className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-500/50"
                     style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
+                    required
                   />
                 </div>
               </div>
@@ -103,6 +176,7 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-500/50"
                     style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
+                    required
                   />
                 </div>
               </div>
@@ -117,30 +191,63 @@ export default function LoginPage() {
                 id="sign-in-btn"
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 shadow-lg mt-2"
+                className="w-full py-3 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 shadow-lg mt-2 cursor-pointer"
                 style={{ background: loading ? '#5B21B6' : 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
               >
                 {loading ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Signing in...
+                    {isRegister ? 'Registering...' : 'Signing in...'}
                   </>
                 ) : (
                   <>
-                    Sign In
+                    {isRegister ? 'Register' : 'Sign In'}
                     <ArrowRight size={16} />
                   </>
                 )}
               </button>
             </form>
 
-            {/* Demo hint */}
-            <div className="mt-5 p-3 rounded-xl cursor-pointer hover:opacity-80 transition-opacity" style={{ background: 'rgba(124,58,237,0.12)', border: '1px dashed rgba(124,58,237,0.4)' }} onClick={fillDemo}>
-              <p className="text-xs text-center" style={{ color: '#A78BFA' }}>
-                <span className="font-semibold text-purple-300">Demo Access:</span>{' '}
-                <span className="font-mono">demo@intellmeet.ai</span> / <span className="font-mono">demo123</span>
-                <span className="block mt-0.5 text-purple-400/60">Click to autofill</span>
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegister(!isRegister)
+                  setError('')
+                }}
+                className="text-xs text-purple-300 hover:text-white transition-colors underline cursor-pointer"
+              >
+                {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+              </button>
+            </div>
+
+            {/* Demo hints */}
+            <div className="mt-5 p-4 rounded-xl" style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)' }}>
+              <p className="text-xs font-semibold text-center mb-2.5" style={{ color: '#A78BFA' }}>
+                ⚡ Quick Demo Access (Click to Authenticate)
               </p>
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { name: 'Arjun Sharma', role: 'Product Manager', email: 'demo@intellmeet.ai', initials: 'AS', color: '#7C3AED' },
+                  { name: 'Priya Mehta', role: 'Design Lead', email: 'priya@intellmeet.ai', initials: 'PM', color: '#06B6D4' },
+                  { name: 'Rahul Verma', role: 'Lead Engineer', email: 'rahul@intellmeet.ai', initials: 'RV', color: '#F59E0B' },
+                ].map(demo => (
+                  <button
+                    key={demo.email}
+                    type="button"
+                    onClick={() => fillAndSubmitDemo(demo.email)}
+                    className="flex items-center gap-2.5 p-2 rounded-lg text-left text-xs text-white/80 hover:text-white transition-all duration-200 hover:bg-white/5 active:scale-[0.98] border border-white/5 cursor-pointer"
+                  >
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px]" style={{ background: demo.color }}>
+                      {demo.initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">{demo.name}</div>
+                      <div className="text-[10px] text-white/40 truncate">{demo.role} • {demo.email}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
