@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
+import api from '../config/api.js'
 import {
   Bot,
   Download,
@@ -13,6 +14,13 @@ import {
   ChevronLeft,
   Quote,
   AlertCircle,
+  Sparkles,
+  Loader2,
+  X,
+  ClipboardList,
+  User,
+  CalendarDays,
+  Flag,
 } from 'lucide-react'
 
 interface ActionItem {
@@ -23,6 +31,14 @@ interface ActionItem {
   due: string
   priority: string
   done: boolean
+}
+
+// AI response action item shape
+interface AIActionItem {
+  task: string
+  assignee: string
+  deadline: string
+  priority: string // "high" | "medium" | "low"
 }
 
 interface Highlight {
@@ -111,11 +127,247 @@ const meetingsData: Record<string, MeetingData> = {
   }
 }
 
-const priorityConfig: Record<string, { color: string; bg: string; label: string }> = {
-  HIGH: { color: '#EF4444', bg: 'rgba(239,68,68,0.1)', label: 'HIGH' },
-  MEDIUM: { color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', label: 'MEDIUM' },
-  LOW: { color: '#10B981', bg: 'rgba(16,185,129,0.1)', label: 'LOW' },
+const priorityConfig: Record<string, { color: string; bg: string; label: string; dot: string }> = {
+  HIGH:   { color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   label: 'HIGH',   dot: '#EF4444' },
+  high:   { color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   label: 'HIGH',   dot: '#EF4444' },
+  MEDIUM: { color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', label: 'MEDIUM', dot: '#F59E0B' },
+  medium: { color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', label: 'MEDIUM', dot: '#F59E0B' },
+  LOW:    { color: '#10B981', bg: 'rgba(16,185,129,0.1)',  label: 'LOW',    dot: '#10B981' },
+  low:    { color: '#10B981', bg: 'rgba(16,185,129,0.1)',  label: 'LOW',    dot: '#10B981' },
 }
+
+// ─── AI Analysis Panel ──────────────────────────────────────────────────────
+
+interface AIResult {
+  summary: string
+  actionItems: AIActionItem[]
+}
+
+function AIAnalysisPanel() {
+  const [transcript, setTranscript] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<AIResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleAnalyze() {
+    if (!transcript.trim() || transcript.trim().length < 10) {
+      setError('Please paste a transcript with at least 10 characters.')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    setResult(null)
+
+    try {
+      const res = await api.post('/ai/analyze', { transcript })
+      setResult(res.data)
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.error ||
+        'Failed to connect to AI service. Please try again.'
+      setError(msg)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleClear() {
+    setTranscript('')
+    setResult(null)
+    setError(null)
+  }
+
+  const summaryLines = result?.summary
+    ? result.summary.split('\n').filter(l => l.trim())
+    : []
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden shadow-sm"
+      style={{
+        border: '2px solid transparent',
+        backgroundImage: 'linear-gradient(#F8FAFC, #F8FAFC), linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)',
+        backgroundOrigin: 'border-box',
+        backgroundClip: 'padding-box, border-box',
+      }}
+    >
+      {/* Header */}
+      <div
+        className="px-6 py-4 flex items-center justify-between"
+        style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <Sparkles size={18} className="text-white" />
+          </div>
+          <div>
+            <h2 className="font-bold text-white text-base">AI Meeting Analysis</h2>
+            <p className="text-purple-200 text-xs">Powered by GPT-3.5 Turbo</p>
+          </div>
+        </div>
+        {result && (
+          <button
+            onClick={handleClear}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <X size={12} /> Clear
+          </button>
+        )}
+      </div>
+
+      <div className="p-6 space-y-4 bg-white">
+        {/* Transcript input */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2" htmlFor="ai-transcript">
+            Meeting Transcript
+          </label>
+          <textarea
+            id="ai-transcript"
+            rows={6}
+            value={transcript}
+            onChange={e => { setTranscript(e.target.value); setError(null) }}
+            placeholder="Paste your meeting transcript here...&#10;&#10;Example:&#10;Alice: Let's discuss the Q3 roadmap. Bob needs to send the design files by Friday.&#10;Bob: Sure, I'll also prepare the budget breakdown, it's high priority.&#10;Alice: Great. Mark will follow up with the client by next Monday."
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-100 focus:border-purple-400 resize-none font-mono leading-relaxed"
+            style={{ background: '#FAFAFA' }}
+          />
+          <div className="flex items-center justify-between mt-1.5">
+            <span className="text-xs text-slate-400">
+              {transcript.trim().length > 0 ? `${transcript.trim().length} characters` : 'Min. 10 characters required'}
+            </span>
+            {transcript.length > 0 && (
+              <button
+                onClick={() => setTranscript('')}
+                className="text-xs text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                Clear text
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-red-200 bg-red-50">
+            <AlertCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: '#EF4444' }} />
+            <p className="text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>
+          </div>
+        )}
+
+        {/* Analyze button */}
+        <button
+          id="ai-analyze-btn"
+          onClick={handleAnalyze}
+          disabled={loading || transcript.trim().length < 10}
+          className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 cursor-pointer"
+          style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+        >
+          {loading ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              AI is analyzing…
+            </>
+          ) : (
+            <>
+              <Sparkles size={16} />
+              Analyze with AI
+            </>
+          )}
+        </button>
+
+        {/* Results */}
+        {result && (
+          <div className="space-y-5 pt-2">
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-slate-100" />
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">AI Results</span>
+              <div className="flex-1 h-px bg-slate-100" />
+            </div>
+
+            {/* Summary */}
+            <div className="rounded-xl overflow-hidden border border-slate-100">
+              <div className="px-4 py-3 flex items-center gap-2 border-b border-slate-100" style={{ background: 'rgba(124,58,237,0.04)' }}>
+                <Bot size={15} style={{ color: '#7C3AED' }} />
+                <h3 className="font-bold text-slate-800 text-sm">AI Summary</h3>
+              </div>
+              <div className="p-4 space-y-2.5">
+                {summaryLines.length > 0 ? (
+                  summaryLines.map((line, i) => (
+                    <div key={i} className="flex gap-3">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold"
+                        style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)', fontSize: '10px' }}
+                      >
+                        {i + 1}
+                      </div>
+                      <p className="text-sm text-slate-700 leading-relaxed">
+                        {line.replace(/^[•\-*]\s*/, '')}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{result.summary}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Action Items */}
+            {result.actionItems && result.actionItems.length > 0 && (
+              <div className="rounded-xl overflow-hidden border border-slate-100">
+                <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100" style={{ background: 'rgba(124,58,237,0.04)' }}>
+                  <div className="flex items-center gap-2">
+                    <ClipboardList size={15} style={{ color: '#7C3AED' }} />
+                    <h3 className="font-bold text-slate-800 text-sm">Extracted Action Items</h3>
+                  </div>
+                  <span
+                    className="text-xs font-semibold px-2.5 py-1 rounded-lg"
+                    style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED' }}
+                  >
+                    {result.actionItems.length} item{result.actionItems.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="divide-y divide-slate-50">
+                  {result.actionItems.map((item, i) => {
+                    const pc = priorityConfig[item.priority] || priorityConfig['MEDIUM']
+                    return (
+                      <div key={i} className="px-4 py-3.5 hover:bg-slate-50/80 transition-colors">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-semibold text-sm text-slate-800 leading-snug flex-1">{item.task}</p>
+                          <span
+                            className="px-2 py-0.5 rounded-md text-xs font-bold flex-shrink-0"
+                            style={{ color: pc.color, background: pc.bg }}
+                          >
+                            {pc.label}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 mt-2">
+                          <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                            <User size={11} />
+                            {item.assignee}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                            <CalendarDays size={11} />
+                            {item.deadline}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-xs" style={{ color: pc.color }}>
+                            <Flag size={11} />
+                            {pc.label} priority
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function PostMeetingPage() {
   const navigate = useNavigate()
@@ -268,6 +520,9 @@ export default function PostMeetingPage() {
               })}
             </div>
           </div>
+
+          {/* ─── AI Analysis Panel ─── */}
+          <AIAnalysisPanel />
 
           {/* Transcript Highlights */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">

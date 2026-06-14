@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const authRoutes = require('./routes/auth');
 const meetingRoutes = require('./routes/meetings');
 const taskRoutes = require('./routes/tasks');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -65,6 +66,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Fallback for unmatched routes (404 handler)
 app.use((req, res, next) => {
