@@ -16,7 +16,7 @@ const navItems = [
   { icon: CalendarPlus, label: 'Schedule', path: '/schedule-meeting' },
   { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
-  { icon: Settings, label: 'Settings', path: '/dashboard' },
+  { icon: Settings, label: 'Settings', path: '/settings' },
 ]
 
 export default function Sidebar() {
