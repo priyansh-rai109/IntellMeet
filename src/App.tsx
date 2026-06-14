@@ -7,13 +7,14 @@ import TasksPage from './pages/TasksPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import RegisterPage from './pages/RegisterPage'
 import ScheduleMeetingPage from './pages/ScheduleMeetingPage'
+import LandingPage from './pages/LandingPage'
 import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
@@ -22,7 +23,7 @@ export default function App() {
         <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
         <Route path="/schedule-meeting" element={<ProtectedRoute><ScheduleMeetingPage /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
