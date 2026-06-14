@@ -7,11 +7,13 @@ import {
   Settings,
   Bot,
   LogOut,
+  CalendarPlus,
 } from 'lucide-react'
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: Video, label: 'Meetings', path: '/meeting/1' },
+  { icon: CalendarPlus, label: 'Schedule', path: '/schedule-meeting' },
   { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
   { icon: Settings, label: 'Settings', path: '/dashboard' },
