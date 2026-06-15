@@ -174,7 +174,7 @@ Open **http://localhost:5173** — the app connects to the backend at `localhost
 | `MONGODB_URI` | ✅ | MongoDB connection string |
 | `JWT_SECRET` | ✅ | Secret for signing access tokens |
 | `JWT_REFRESH_SECRET` | ✅ | Secret for signing refresh tokens |
-| `FRONTEND_URL` | ✅ (prod) | Vercel deployment URL — drives Socket.io & Express CORS |
+| `CLIENT_URL` | ✅ (prod) | Vercel deployment URL — drives Socket.io & Express CORS |
 | `OPENAI_API_KEY` | ⚡ | OpenAI key — required for AI features |
 | `PORT` | — | Defaults to `5000`; Render sets this automatically |
 | `NODE_ENV` | — | `development` or `production` |
@@ -344,7 +344,7 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the complete step-by-step guide cover
 
 | Platform | Variable | Value |
 |----------|----------|-------|
-| Render | `FRONTEND_URL` | `https://your-app.vercel.app` |
+| Render | `CLIENT_URL` | `https://your-app.vercel.app` |
 | Vercel | `VITE_BACKEND_URL` | `https://your-backend.onrender.com` |
 
 ---

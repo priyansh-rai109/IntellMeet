@@ -22,11 +22,10 @@ const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 // ─── Allowed origins ──────────────────────────────────────────────────────────
-// FRONTEND_URL is the single source of truth for production.
-// LOCAL_CLIENT_URL allows local dev without setting FRONTEND_URL.
+// CLIENT_URL is the canonical production origin (set on Render).
+// localhost fallbacks mean local dev works with zero .env config.
 const allowedOrigins = [
-  process.env.FRONTEND_URL,              // production Vercel URL
-  process.env.CLIENT_URL,               // legacy / local override
+  process.env.CLIENT_URL,               // production Vercel URL (Render env var)
   'http://localhost:5173',              // Vite dev server fallback
   'http://localhost:4173',              // Vite preview fallback
 ].filter(Boolean); // drop undefined entries

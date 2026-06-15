@@ -34,10 +34,10 @@ Set these in **Render → Environment → Environment Variables**:
 | `JWT_SECRET` | Secret for signing access tokens | any long random string |
 | `JWT_REFRESH_SECRET` | Secret for signing refresh tokens | any long random string |
 | `OPENAI_API_KEY` | OpenAI API key for AI features | `sk-...` |
-| **`FRONTEND_URL`** | **Your Vercel deployment URL** (no trailing slash) | `https://intell-meet-ten.vercel.app` |
+| **`CLIENT_URL`** | **Your Vercel deployment URL** (no trailing slash) | `https://intell-meet-ten.vercel.app` |
 
 > [!IMPORTANT]
-> `FRONTEND_URL` is the key variable that unlocks cross-domain Socket.io + CORS.
+> `CLIENT_URL` is the key variable that unlocks cross-domain Socket.io + CORS.
 > It must match the exact origin Vercel serves your app from (check the Vercel dashboard).
 
 ### Health check
@@ -96,7 +96,7 @@ The code defaults to `localhost` when env vars are absent:
 | Config | Local fallback |
 |--------|---------------|
 | `VITE_BACKEND_URL` | `http://localhost:5000` |
-| `FRONTEND_URL` | `http://localhost:5173` (hardcoded in `allowedOrigins`) |
+| `CLIENT_URL` | `http://localhost:5173` (hardcoded in `allowedOrigins`) |
 
 So you can run locally with zero configuration:
 ```bash
@@ -113,7 +113,7 @@ npm run dev                  # :5173
 
 ```
 Browser (Vercel)  ──── WSS ────▶  Render backend
-  VITE_BACKEND_URL               FRONTEND_URL in allowedOrigins
+  VITE_BACKEND_URL               CLIENT_URL in allowedOrigins
 ```
 
 Both transports are enabled (`websocket` then `polling` fallback) so it works even behind Render's reverse proxy. Render supports WebSocket upgrades natively on Web Services.
@@ -124,7 +124,7 @@ Both transports are enabled (`websocket` then `polling` fallback) so it works ev
 
 | Symptom | Likely cause | Fix |
 |---------|-------------|-----|
-| Socket disconnects immediately | `FRONTEND_URL` not set / wrong on Render | Check Render env vars |
+| Socket disconnects immediately | `CLIENT_URL` not set / wrong on Render | Check Render env vars |
 | `403 CORS` on REST calls | `VITE_BACKEND_URL` wrong on Vercel | Verify Vercel env vars |
 | Blank page on Vercel | Missing `base: '/'` in `vite.config.ts` | Already set ✓ |
 | WebRTC no video | Browser blocks camera on non-HTTPS | Ensure both Vercel & Render use HTTPS |
