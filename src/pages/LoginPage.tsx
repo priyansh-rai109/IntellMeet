@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bot, Mail, Lock, ArrowRight, Sparkles, Shield, Zap, UserPlus } from 'lucide-react'
+import { 
+  Bot, 
+  Mail, 
+  Lock, 
+  ArrowRight, 
+  Sparkles, 
+  Shield, 
+  Zap, 
+  Eye, 
+  EyeOff 
+} from 'lucide-react'
 import api from '../config/api'
 
 export default function LoginPage() {
@@ -9,6 +19,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  
+  // Custom interactive state additions
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,85 +80,145 @@ export default function LoginPage() {
     }
   }
 
+  const handleForgotPassword = () => {
+    console.log('Forgot password clicked - wire connection recovery logic here later')
+  }
+
+  const handleGoogleSignIn = () => {
+    console.log('Google OAuth - coming soon')
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #2D1B69 0%, #1a1a3e 40%, #0a2440 100%)' }}>
-      {/* Animated background orbs */}
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4" style={{ background: '#0a0f1a', fontFamily: "'Inter', sans-serif" }}>
+      {/* Dynamic styles */}
+      <style>{`
+        @keyframes fadeInCard {
+          0% { opacity: 0; transform: translateY(14px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .login-card {
+          animation: fadeInCard 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .glow-button {
+          box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glow-button:hover:not(:disabled) {
+          box-shadow: 0 0 25px rgba(59, 130, 246, 0.45);
+          transform: scale(1.01);
+        }
+        .glow-button:active:not(:disabled) {
+          transform: scale(0.99);
+        }
+      `}</style>
+
+      {/* Background ambient light */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-80 h-80 rounded-full opacity-30 blur-3xl" style={{ background: 'radial-gradient(circle, #7C3AED, transparent)' }} />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-25 blur-3xl" style={{ background: 'radial-gradient(circle, #06B6D4, transparent)' }} />
-        <div className="absolute top-1/2 left-1/4 w-64 h-64 rounded-full opacity-15 blur-3xl" style={{ background: 'radial-gradient(circle, #A78BFA, transparent)' }} />
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '60px 60px'
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
+        <div className="absolute -bottom-40 -right-40 w-[450px] h-[450px] rounded-full opacity-10 blur-3xl" style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
+        {/* Fine background grid */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
+          backgroundSize: '80px 80px'
         }} />
       </div>
 
-      {/* Feature badges */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-4 flex-wrap justify-center px-4">
-        {[
-          { icon: Zap, text: 'Real-time Transcription' },
-          { icon: Shield, text: 'Enterprise Secure' },
-          { icon: Sparkles, text: 'AI Summaries' },
-        ].map(({ icon: Icon, text }) => (
-          <div key={text} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-white/60 border border-white/10 backdrop-blur-sm">
-            <Icon size={12} className="text-purple-400" />
-            {text}
-          </div>
-        ))}
+      {/* Feature badges row */}
+      <div className="w-full max-w-md mb-8 flex justify-center">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap max-w-full px-4 py-2 justify-start md:justify-center">
+          {[
+            { icon: Zap, text: 'Real-time Transcription' },
+            { icon: Shield, text: 'Enterprise Secure' },
+            { icon: Sparkles, text: 'AI Summaries' },
+          ].map(({ icon: Icon, text }) => (
+            <div key={text} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-400 border border-slate-800 bg-slate-950/40 backdrop-blur-sm flex-shrink-0">
+              <Icon size={12} className="text-blue-400" />
+              {text}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Login Card */}
-      <div className="relative w-full max-w-md mx-4 animate-fade-in-up">
-        <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.12)' }}>
-          {/* Card header gradient */}
-          <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #7C3AED, #06B6D4)' }} />
+      {/* Main Login Card */}
+      <div className="login-card w-full max-w-md opacity-0">
+        <div className="rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl border border-white/10" style={{ background: '#0d1420' }}>
+          {/* Accent strip */}
+          <div className="h-1 w-full bg-blue-500" style={{ boxShadow: '0 1px 15px rgba(59, 130, 246, 0.4)' }} />
 
           <div className="p-8">
             {/* Logo */}
             <div className="flex flex-col items-center mb-8">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg" style={{ background: 'linear-gradient(135deg, #7C3AED, #06B6D4)' }}>
-                <Bot size={32} className="text-white" />
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg bg-blue-600" style={{ boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' }}>
+                <Bot size={28} className="text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-1">IntellMeet</h1>
-              <p className="text-sm font-medium" style={{ color: '#A78BFA' }}>AI-Powered Meeting Intelligence</p>
+              <h1 className="text-2xl font-black tracking-tight text-white mb-0.5">IntellMeet</h1>
+              <p className="text-xs font-medium text-blue-400">AI-Powered Meeting Insights</p>
             </div>
 
-            {/* Form */}
+            {/* Input Form */}
             <form onSubmit={handleSignIn} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Email</label>
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</label>
                 <div className="relative">
-                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+                  <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input
                     id="email-input"
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-500/50"
-                    style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
+                    className="w-full pl-11 pr-4 min-h-[52px] rounded-xl text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.07)' }}
                     required
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Password</label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password</label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-[11px] text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <div className="relative">
-                  <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input
                     id="password-input"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-500/50"
-                    style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
+                    className="w-full pl-11 pr-12 min-h-[52px] rounded-xl text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.07)' }}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(p => !p)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
+              </div>
+
+              {/* Remember me checkbox */}
+              <div className="flex items-center gap-2 py-1">
+                <input
+                  id="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={e => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500/20 focus:ring-offset-slate-900 focus:ring-2 cursor-pointer"
+                />
+                <label htmlFor="remember-me" className="text-xs text-slate-400 font-medium select-none cursor-pointer">
+                  Remember me
+                </label>
               </div>
 
               {error && (
@@ -153,12 +227,13 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {/* Login Button */}
               <button
                 id="sign-in-btn"
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 shadow-lg mt-2 cursor-pointer"
-                style={{ background: loading ? '#5B21B6' : 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+                className="glow-button w-full min-h-[52px] rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-60 cursor-pointer"
+                style={{ background: loading ? '#1d4ed8' : '#3b82f6' }}
               >
                 {loading ? (
                   <>
@@ -172,35 +247,57 @@ export default function LoginPage() {
                   </>
                 )}
               </button>
+
+              {/* OAuth Divider */}
+              <div className="flex items-center gap-3 my-4 py-2">
+                <div className="h-px bg-slate-800 flex-1" />
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">or</span>
+                <div className="h-px bg-slate-800 flex-1" />
+              </div>
+
+              {/* Google OAuth Button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                className="w-full min-h-[52px] rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-colors bg-transparent border border-slate-800 hover:bg-white/5 active:scale-[0.98] flex items-center justify-center cursor-pointer"
+              >
+                <svg className="w-4 h-4 mr-2.5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335" />
+                </svg>
+                Continue with Google
+              </button>
             </form>
 
-            {/* Note & Redirect Link to Register */}
-            <div className="mt-4 text-center">
-              <span className="text-xs text-white/50">Don't have account? </span>
+            {/* Redirect link to Register */}
+            <div className="mt-5 text-center">
+              <span className="text-xs text-slate-400">Don't have an account? </span>
               <button
                 type="button"
                 id="go-to-register-btn"
                 onClick={() => navigate('/register')}
-                className="text-xs text-purple-300 hover:text-white transition-colors underline cursor-pointer font-semibold"
+                className="text-xs text-blue-400 hover:text-white transition-colors underline cursor-pointer font-bold ml-0.5"
               >
                 Register here
               </button>
             </div>
 
-            {/* Demo hints */}
-            <div className="mt-5 p-4 rounded-xl border border-white/10" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <p className="text-xs font-semibold text-center mb-2" style={{ color: '#A78BFA' }}>
-                ⚡ pre-seeded Demo Account
+            {/* Pre-seeded Demo account box */}
+            <div className="mt-6 p-4 rounded-2xl border border-slate-800 bg-slate-950/30">
+              <p className="text-xs font-bold text-center mb-1.5 text-blue-400 flex items-center justify-center gap-1">
+                ⚡ Pre-seeded Demo Account
               </p>
-              <p className="text-[10px] text-center text-white/40 mb-3 leading-normal">
-                Credentials: <strong className="text-white/80">demo@intellmeet.ai</strong> / <strong className="text-white/80">Demo2026</strong>
+              <p className="text-[10px] text-center text-slate-500 mb-3 leading-relaxed">
+                Credentials: <strong className="text-slate-300">demo@intellmeet.ai</strong> / <strong className="text-slate-300">Demo2026</strong>
                 <br />
                 (Click the button below to quick-authenticate)
               </p>
               <button
                 type="button"
                 onClick={() => fillAndSubmitDemo('demo@intellmeet.ai')}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-left text-xs font-semibold text-white/80 hover:text-white transition-all duration-200 hover:bg-white/5 active:scale-[0.98] border border-white/5 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all duration-200 hover:bg-white/5 active:scale-[0.98] border border-slate-800 cursor-pointer"
               >
                 Quick Demo Authentication
               </button>
@@ -208,8 +305,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Bottom tagline */}
-        <p className="text-center text-white/30 text-xs mt-6">
+        {/* Bottom Tagline */}
+        <p className="text-center text-slate-600 text-xs mt-6">
           Trusted by 500+ enterprise teams worldwide
         </p>
       </div>
