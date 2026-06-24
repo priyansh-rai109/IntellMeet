@@ -85,7 +85,40 @@ export default function LoginPage() {
   }
 
   const handleGoogleSignIn = () => {
-    console.log('Google OAuth - coming soon')
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    if (!clientId) {
+      setError('Google Sign-In is not configured.')
+      return
+    }
+    // @ts-ignore
+    if (window.google) {
+      // @ts-ignore
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response: any) => {
+          setLoading(true)
+          setError('')
+          try {
+            const res = await api.post('/auth/google', { token: response.credential })
+            const data = res.data || res
+            localStorage.setItem('token', data.accessToken)
+            localStorage.setItem('userName', data.user?.name || '')
+            localStorage.setItem('userEmail', data.user?.email || '')
+            localStorage.setItem('role', data.user?.role || 'member')
+            localStorage.setItem('initials', data.user?.avatar || 'GU')
+            navigate('/dashboard')
+          } catch (err: any) {
+            setError('Google Sign-In failed. Please try again.')
+          } finally {
+            setLoading(false)
+          }
+        },
+      })
+      // @ts-ignore
+      window.google.accounts.id.prompt()
+    } else {
+      setError('Google Sign-In failed to load. Please refresh and try again.')
+    }
   }
 
   return (
