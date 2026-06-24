@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import api from '../config/api.js'
+import { toast } from 'react-hot-toast'
 import {
   Bot,
   Download,
@@ -33,7 +34,6 @@ interface ActionItem {
   done: boolean
 }
 
-// AI response action item shape
 interface AIActionItem {
   task: string
   assignee: string
@@ -127,13 +127,13 @@ const meetingsData: Record<string, MeetingData> = {
   }
 }
 
-const priorityConfig: Record<string, { color: string; bg: string; label: string; dot: string }> = {
-  HIGH:   { color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   label: 'HIGH',   dot: '#EF4444' },
-  high:   { color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   label: 'HIGH',   dot: '#EF4444' },
-  MEDIUM: { color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', label: 'MEDIUM', dot: '#F59E0B' },
-  medium: { color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', label: 'MEDIUM', dot: '#F59E0B' },
-  LOW:    { color: '#10B981', bg: 'rgba(16,185,129,0.1)',  label: 'LOW',    dot: '#10B981' },
-  low:    { color: '#10B981', bg: 'rgba(16,185,129,0.1)',  label: 'LOW',    dot: '#10B981' },
+const priorityConfig: Record<string, { label: string; className: string }> = {
+  HIGH:   { label: 'HIGH',   className: 'bg-red-500/20 text-red-400 border border-red-500/30' },
+  high:   { label: 'HIGH',   className: 'bg-red-500/20 text-red-400 border border-red-500/30' },
+  MEDIUM: { label: 'MEDIUM', className: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+  medium: { label: 'MEDIUM', className: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+  LOW:    { label: 'LOW',    className: 'bg-green-500/20 text-green-400 border border-green-500/30' },
+  low:    { label: 'LOW',    className: 'bg-green-500/20 text-green-400 border border-green-500/30' },
 }
 
 // ─── AI Analysis Panel ──────────────────────────────────────────────────────
@@ -182,31 +182,21 @@ function AIAnalysisPanel() {
     : []
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden shadow-sm"
-      style={{
-        border: '2px solid transparent',
-        backgroundImage: 'linear-gradient(#F8FAFC, #F8FAFC), linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)',
-        backgroundOrigin: 'border-box',
-        backgroundClip: 'padding-box, border-box',
-      }}
-    >
+    <div className="rounded-2xl overflow-hidden shadow-lg border border-white/8 bg-white/[0.04] backdrop-blur-md">
       {/* Header */}
-      <div
-        className="px-6 py-4 flex items-center justify-between"
-        style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
-      >
+      <div className="px-6 py-4 flex items-center justify-between bg-blue-600">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
             <Sparkles size={18} className="text-white" />
           </div>
           <div>
             <h2 className="font-bold text-white text-base">AI Meeting Analysis</h2>
-            <p className="text-purple-200 text-xs">Powered by GPT-3.5 Turbo</p>
+            <p className="text-blue-200 text-xs">Powered by GPT-3.5 Turbo</p>
           </div>
         </div>
         {result && (
           <button
+            type="button"
             onClick={handleClear}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer flex items-center gap-1.5"
           >
@@ -215,10 +205,10 @@ function AIAnalysisPanel() {
         )}
       </div>
 
-      <div className="p-6 space-y-4 bg-white">
+      <div className="p-6 space-y-4">
         {/* Transcript input */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2" htmlFor="ai-transcript">
+          <label className="block text-sm font-semibold text-gray-300 mb-2" htmlFor="ai-transcript">
             Meeting Transcript
           </label>
           <textarea
@@ -227,17 +217,17 @@ function AIAnalysisPanel() {
             value={transcript}
             onChange={e => { setTranscript(e.target.value); setError(null) }}
             placeholder="Paste your meeting transcript here...&#10;&#10;Example:&#10;Alice: Let's discuss the Q3 roadmap. Bob needs to send the design files by Friday.&#10;Bob: Sure, I'll also prepare the budget breakdown, it's high priority.&#10;Alice: Great. Mark will follow up with the client by next Monday."
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-100 focus:border-purple-400 resize-none font-mono leading-relaxed"
-            style={{ background: '#FAFAFA' }}
+            className="w-full px-4 py-3 rounded-xl border border-white/10 text-sm text-gray-300 placeholder-gray-600 outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none font-mono leading-relaxed bg-white/5"
           />
           <div className="flex items-center justify-between mt-1.5">
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-gray-500">
               {transcript.trim().length > 0 ? `${transcript.trim().length} characters` : 'Min. 10 characters required'}
             </span>
             {transcript.length > 0 && (
               <button
+                type="button"
                 onClick={() => setTranscript('')}
-                className="text-xs text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                className="text-xs text-gray-500 hover:text-white transition-colors cursor-pointer"
               >
                 Clear text
               </button>
@@ -247,9 +237,9 @@ function AIAnalysisPanel() {
 
         {/* Error message */}
         {error && (
-          <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-red-200 bg-red-50">
-            <AlertCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: '#EF4444' }} />
-            <p className="text-sm font-medium" style={{ color: '#DC2626' }}>{error}</p>
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-red-500/20 bg-red-500/5">
+            <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-400" />
+            <p className="text-sm font-medium text-red-400">{error}</p>
           </div>
         )}
 
@@ -258,8 +248,7 @@ function AIAnalysisPanel() {
           id="ai-analyze-btn"
           onClick={handleAnalyze}
           disabled={loading || transcript.trim().length < 10}
-          className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 cursor-pointer"
-          style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+          className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 active:scale-[0.99] shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-blue-600 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
         >
           {loading ? (
             <>
@@ -279,77 +268,71 @@ function AIAnalysisPanel() {
           <div className="space-y-5 pt-2">
             {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-slate-100" />
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">AI Results</span>
-              <div className="flex-1 h-px bg-slate-100" />
+              <div className="flex-1 h-px bg-white/5" />
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">AI Results</span>
+              <div className="flex-1 h-px bg-white/5" />
             </div>
 
             {/* Summary */}
-            <div className="rounded-xl overflow-hidden border border-slate-100">
-              <div className="px-4 py-3 flex items-center gap-2 border-b border-slate-100" style={{ background: 'rgba(124,58,237,0.04)' }}>
-                <Bot size={15} style={{ color: '#7C3AED' }} />
-                <h3 className="font-bold text-slate-800 text-sm">AI Summary</h3>
+            <div className="rounded-xl overflow-hidden border border-white/10 bg-white/[0.02]">
+              <div className="px-4 py-3 flex items-center gap-2 border-b border-white/5 bg-blue-600/10">
+                <Bot size={15} className="text-blue-400" />
+                <h3 className="font-bold text-white text-sm">AI Summary</h3>
               </div>
               <div className="p-4 space-y-2.5">
                 {summaryLines.length > 0 ? (
                   summaryLines.map((line, i) => (
                     <div key={i} className="flex gap-3">
                       <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold"
-                        style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)', fontSize: '10px' }}
+                        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold bg-blue-600"
+                        style={{ fontSize: '10px' }}
                       >
                         {i + 1}
                       </div>
-                      <p className="text-sm text-slate-700 leading-relaxed">
+                      <p className="text-sm text-gray-300 leading-relaxed">
                         {line.replace(/^[•\-*]\s*/, '')}
                       </p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{result.summary}</p>
+                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{result.summary}</p>
                 )}
               </div>
             </div>
 
             {/* Action Items */}
             {result.actionItems && result.actionItems.length > 0 && (
-              <div className="rounded-xl overflow-hidden border border-slate-100">
-                <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100" style={{ background: 'rgba(124,58,237,0.04)' }}>
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-white/[0.02]">
+                <div className="px-4 py-3 flex items-center justify-between border-b border-white/5 bg-blue-600/10">
                   <div className="flex items-center gap-2">
-                    <ClipboardList size={15} style={{ color: '#7C3AED' }} />
-                    <h3 className="font-bold text-slate-800 text-sm">Extracted Action Items</h3>
+                    <ClipboardList size={15} className="text-blue-400" />
+                    <h3 className="font-bold text-white text-sm">Extracted Action Items</h3>
                   </div>
-                  <span
-                    className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-                    style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED' }}
-                  >
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-400">
                     {result.actionItems.length} item{result.actionItems.length !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <div className="divide-y divide-slate-50">
+                <div className="divide-y divide-white/5">
                   {result.actionItems.map((item, i) => {
                     const pc = priorityConfig[item.priority] || priorityConfig['MEDIUM']
                     return (
-                      <div key={i} className="px-4 py-3.5 hover:bg-slate-50/80 transition-colors">
+                      <div key={i} className="px-4 py-3.5 hover:bg-white/5 transition-colors">
                         <div className="flex items-start justify-between gap-3">
-                          <p className="font-semibold text-sm text-slate-800 leading-snug flex-1">{item.task}</p>
-                          <span
-                            className="px-2 py-0.5 rounded-md text-xs font-bold flex-shrink-0"
-                            style={{ color: pc.color, background: pc.bg }}
-                          >
+                          <p className="font-semibold text-sm text-white leading-snug flex-1">{item.task}</p>
+                          <span className={`px-2 py-0.5 rounded-md text-xs font-bold flex-shrink-0 ${pc.className}`}>
                             {pc.label}
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-3 mt-2">
-                          <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <User size={11} />
+                          <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                            <User size={11} className="text-gray-500" />
                             {item.assignee}
                           </span>
-                          <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <CalendarDays size={11} />
+                          <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                            <CalendarDays size={11} className="text-gray-500" />
                             {item.deadline}
                           </span>
-                          <span className="flex items-center gap-1.5 text-xs" style={{ color: pc.color }}>
+                          <span className={`flex items-center gap-1.5 text-xs font-medium`}>
                             <Flag size={11} />
                             {pc.label} priority
                           </span>
@@ -385,40 +368,48 @@ export default function PostMeetingPage() {
   }
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#F8FAFC' }}>
+    <div className="flex min-h-screen" style={{ background: '#0a0f1a' }}>
       <Sidebar />
 
       <main className="flex-1 ml-64 min-h-screen">
+        {/* Style block for glow */}
+        <style>{`
+          .glow-btn-blue {
+            transition: all 0.3s ease;
+          }
+          .glow-btn-blue:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.45);
+          }
+        `}</style>
+
         {/* Header */}
-        <div className="sticky top-0 z-30 px-8 py-4 border-b border-slate-200/80 flex items-center justify-between" style={{ background: 'rgba(248,250,252,0.95)', backdropFilter: 'blur(12px)' }}>
+        <div className="sticky top-0 z-30 px-8 py-4 border-b border-white/5 flex items-center justify-between" style={{ background: 'rgba(10, 15, 26, 0.85)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center gap-3">
             <button
               id="back-to-dashboard"
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-white transition-colors cursor-pointer"
             >
               <ChevronLeft size={16} />
               Back to Dashboard
             </button>
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ background: '#10B981' }} />
-              <span className="text-xs text-slate-500 font-medium">Meeting Complete</span>
+            <div className="h-4 w-px bg-white/10" />
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <span>Meeting Complete</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               id="export-pdf-btn"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-85 border cursor-pointer"
-              style={{ borderColor: '#7C3AED', color: '#7C3AED' }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white cursor-pointer"
             >
               <Download size={14} />
               Export PDF
             </button>
             <button
               id="share-btn"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+              className="glow-btn-blue flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all cursor-pointer bg-blue-600 hover:bg-blue-500"
             >
               <Share2 size={14} />
               Share
@@ -426,93 +417,92 @@ export default function PostMeetingPage() {
           </div>
         </div>
 
-        <div className="px-8 py-6 max-w-4xl mx-auto space-y-6 page-enter">
+        <div className="px-8 py-6 max-w-4xl mx-auto space-y-6">
           {/* Meeting Header */}
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">{meetingData.title} — Meeting Summary</h1>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+          <div className="border-b border-white/5 pb-4 mb-2">
+            <h1 className="text-3xl font-bold text-white mb-2">{meetingData.title} — Meeting Summary</h1>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
               <span className="flex items-center gap-1.5">
-                <Calendar size={14} />
+                <Calendar size={14} className="text-gray-500" />
                 {meetingData.date}
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock size={14} />
+                <Clock size={14} className="text-gray-500" />
                 Duration: {meetingData.duration}
               </span>
               <span className="flex items-center gap-1.5">
-                <Users size={14} />
+                <Users size={14} className="text-gray-500" />
                 {meetingData.participantsText}
               </span>
             </div>
           </div>
 
           {/* AI Summary */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden" style={{ border: '2px solid transparent', backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #7C3AED, #06B6D4)', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}>
-                  <Bot size={16} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="font-bold text-slate-800">🤖 AI Generated Summary</h2>
-                  <p className="text-xs text-slate-500">Powered by IntellMeet AI</p>
-                </div>
+          <div className="bg-[rgba(59,130,246,0.05)] border border-blue-500/30 rounded-2xl p-6 backdrop-blur-md">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500/20">
+                <Bot size={16} className="text-blue-400" />
               </div>
-              <ul className="space-y-3">
-                {meetingData.summary.map((point, i) => (
-                  <li key={i} className="flex gap-3">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)', fontSize: '10px' }}>
-                      {i + 1}
-                    </div>
-                    <p className="text-sm text-slate-700 leading-relaxed">{point}</p>
-                  </li>
-                ))}
-              </ul>
+              <div>
+                <h2 className="font-bold text-white text-base">🤖 AI Generated Summary</h2>
+                <p className="text-xs text-blue-400 mt-0.5">Powered by IntellMeet AI</p>
+              </div>
             </div>
+            <ul className="space-y-3">
+              {meetingData.summary.map((point, i) => (
+                <li key={i} className="flex gap-3">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold text-white bg-blue-600">
+                    {i + 1}
+                  </div>
+                  <p className="text-sm text-gray-200 leading-relaxed">{point}</p>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Action Items */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="bg-white/[0.04] border border-white/8 backdrop-blur-md rounded-2xl p-6">
+            <div className="flex items-center justify-between pb-4 border-b border-white/5 mb-4">
               <div className="flex items-center gap-2">
-                <CheckSquare size={18} style={{ color: '#7C3AED' }} />
-                <h2 className="font-bold text-slate-800">Action Items</h2>
+                <CheckSquare size={18} className="text-blue-400" />
+                <h2 className="font-bold text-white text-base">Action Items</h2>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED' }}>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
                 {Object.values(checkedItems).filter(Boolean).length}/{meetingData.actionItems.length} Complete
               </span>
             </div>
-            <div className="divide-y divide-slate-50">
+            <div className="space-y-1">
               {meetingData.actionItems.map((item, i) => {
                 const pc = priorityConfig[item.priority] || priorityConfig['MEDIUM']
                 return (
-                  <div key={i} className={`px-6 py-4 flex items-center gap-4 hover:bg-slate-50/60 transition-colors ${checkedItems[i] ? 'opacity-60' : ''}`}>
+                  <div key={i} className={`p-3 flex items-center gap-4 hover:bg-white/5 rounded-xl transition-all duration-200 ${checkedItems[i] ? 'opacity-60' : ''}`}>
                     <button
                       id={`action-item-${i}`}
+                      type="button"
                       onClick={() => toggleItem(i)}
                       className="flex-shrink-0 transition-transform hover:scale-110 cursor-pointer"
                     >
                       {checkedItems[i]
-                        ? <CheckSquare size={20} style={{ color: '#7C3AED' }} />
-                        : <Square size={20} className="text-slate-300" />
+                        ? <CheckSquare size={20} className="text-blue-500" />
+                        : <Square size={20} className="text-gray-500 hover:text-white transition-colors" />
                       }
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-semibold text-sm ${checkedItems[i] ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                      <p className={`font-semibold text-sm ${checkedItems[i] ? 'line-through text-gray-500' : 'text-white'}`}>
                         {item.task}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center" style={{ background: item.color }}>
+                          <div className="w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center" style={{ background: item.color }}>
                             {item.initials.charAt(0)}
                           </div>
-                          <span className="text-xs text-slate-500">{item.assignee}</span>
+                          <span className="text-xs text-gray-400">{item.assignee}</span>
                         </div>
-                        <span className="text-slate-300">·</span>
-                        <span className="text-xs text-slate-500">Due: {item.due}</span>
+                        <span className="text-gray-600">·</span>
+                        <span className="text-xs text-gray-500">Due: {item.due}</span>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold flex-shrink-0" style={{ color: pc.color, background: pc.bg }}>
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold flex-shrink-0 ${pc.className}`}>
                       {pc.label}
                     </span>
                   </div>
@@ -521,24 +511,24 @@ export default function PostMeetingPage() {
             </div>
           </div>
 
-          {/* ─── AI Analysis Panel ─── */}
+          {/* AI Analysis Panel */}
           <AIAnalysisPanel />
 
           {/* Transcript Highlights */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
-              <Quote size={18} style={{ color: '#7C3AED' }} />
-              <h2 className="font-bold text-slate-800">Transcript Highlights</h2>
+          <div className="bg-white/[0.04] border border-white/8 backdrop-blur-md rounded-2xl p-6">
+            <div className="flex items-center gap-2 pb-4 border-b border-white/5 mb-4">
+              <Quote size={18} className="text-blue-400" />
+              <h2 className="font-bold text-white text-base">Transcript Highlights</h2>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="space-y-4">
               {meetingData.highlights.map((h, i) => (
-                <div key={i} className="flex gap-4 p-4 rounded-xl hover:bg-slate-50/80 transition-colors" style={{ borderLeft: '3px solid #7C3AED' }}>
-                  <AlertCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: '#A78BFA' }} />
+                <div key={i} className="flex gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors border-l-3 border-blue-500">
+                  <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-blue-400" />
                   <div>
-                    <p className="text-sm text-slate-700 leading-relaxed italic mb-2">"{h.quote}"</p>
+                    <p className="text-sm text-gray-300 leading-relaxed italic mb-2">"{h.quote}"</p>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold text-slate-600">— {h.speaker}</span>
-                      <span className="text-xs text-slate-400 font-mono">{h.time}</span>
+                      <span className="text-xs font-semibold text-gray-400">— {h.speaker}</span>
+                      <span className="text-xs text-slate-500 font-mono">{h.time}</span>
                     </div>
                   </div>
                 </div>
@@ -550,8 +540,7 @@ export default function PostMeetingPage() {
           <div className="flex justify-center pb-6">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90 hover:scale-[1.02] shadow-lg cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+              className="glow-btn-blue flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all cursor-pointer bg-blue-600 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
             >
               <ChevronLeft size={16} />
               Back to Dashboard
