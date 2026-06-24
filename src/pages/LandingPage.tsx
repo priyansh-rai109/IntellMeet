@@ -1,276 +1,48 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Video,
-  Bot,
-  FileText,
-  CheckSquare,
-  BarChart3,
-  Shield,
+  Mic,
+  Sparkles,
   Play,
-  ChevronRight,
   ArrowRight,
-  Zap,
-  Star,
   Menu,
   X,
-  Sparkles,
-  Clock,
+  Bot,
+  Activity,
+  CheckSquare,
+  BarChart3,
   Users,
-  TrendingUp,
-  Globe,
+  Monitor,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Compass,
+  Zap,
+  Check
 } from 'lucide-react'
 
-// ─── Intersection Observer hook for scroll reveal ─────────────────────────
-function useScrollReveal(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
-      { threshold }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [threshold])
-
-  return { ref, visible }
-}
-
-// ─── Data ─────────────────────────────────────────────────────────────────
-
-const features = [
-  {
-    icon: Video,
-    title: 'Real-Time Video Meetings',
-    desc: 'Crystal-clear HD video with screen sharing, virtual backgrounds, and breakout rooms.',
-    color: '#7C3AED',
-    bg: 'rgba(124,58,237,0.08)',
-    border: 'rgba(124,58,237,0.15)',
-  },
-  {
-    icon: Bot,
-    title: 'AI Transcription',
-    desc: 'Automatic real-time transcription with speaker detection and searchable archives.',
-    color: '#06B6D4',
-    bg: 'rgba(6,182,212,0.08)',
-    border: 'rgba(6,182,212,0.15)',
-  },
-  {
-    icon: FileText,
-    title: 'Smart Summaries',
-    desc: 'GPT-powered meeting summaries delivered instantly after every call — no manual notes.',
-    color: '#10B981',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.15)',
-  },
-  {
-    icon: CheckSquare,
-    title: 'Action Item Extraction',
-    desc: 'AI automatically detects tasks, assignees and deadlines so nothing falls through the cracks.',
-    color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.15)',
-  },
-  {
-    icon: BarChart3,
-    title: 'Analytics Dashboard',
-    desc: 'Track meeting frequency, engagement, task completion rates and team productivity trends.',
-    color: '#EF4444',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.15)',
-  },
-  {
-    icon: Shield,
-    title: 'Enterprise Security',
-    desc: 'JWT authentication, end-to-end encryption, SSO support and SOC 2 compliance.',
-    color: '#8B5CF6',
-    bg: 'rgba(139,92,246,0.08)',
-    border: 'rgba(139,92,246,0.15)',
-  },
-]
-
-const stats = [
-  { value: '500+', label: 'Enterprise Teams', icon: Globe },
-  { value: '40-60%', label: 'Less Follow-up Time', icon: TrendingUp },
-  { value: '99.95%', label: 'Uptime SLA', icon: Zap },
-  { value: '10k+', label: 'Meetings Hosted', icon: Users },
-]
-
-const steps = [
-  {
-    step: '01',
-    title: 'Start a Meeting',
-    desc: 'Create or join a meeting instantly with a single click. Invite team members by email or share a link.',
-    icon: Video,
-    color: '#7C3AED',
-  },
-  {
-    step: '02',
-    title: 'AI Listens & Learns',
-    desc: 'Our AI transcribes every word in real-time, identifies speakers, and captures every key decision.',
-    icon: Bot,
-    color: '#06B6D4',
-  },
-  {
-    step: '03',
-    title: 'Get Actionable Insights',
-    desc: 'Receive your AI summary, action items, and analytics immediately after the meeting ends.',
-    icon: Sparkles,
-    color: '#10B981',
-  },
-]
-
-const testimonials = [
-  { name: 'Sarah Chen', role: 'CTO, TechVenture', text: 'IntellMeet cut our follow-up time in half. The AI summaries are incredibly accurate.', rating: 5 },
-  { name: 'Marcus Rivera', role: 'VP Operations, ScaleUp Inc', text: 'Finally a meeting tool that actually helps. Action items are auto-detected every time.', rating: 5 },
-  { name: 'Priya Nair', role: 'Product Lead, InnovateCo', text: 'The AI transcription is a game-changer. We never miss a detail from any meeting now.', rating: 5 },
-]
-
-// ─── Dashboard Mockup ─────────────────────────────────────────────────────
-
-function DashboardMockup() {
-  return (
-    <div
-      className="relative w-full max-w-lg mx-auto"
-      style={{ animation: 'float 6s ease-in-out infinite' }}
-    >
-      {/* Glow blobs */}
-      <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full blur-3xl opacity-30 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #7C3AED, transparent)' }} />
-      <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #06B6D4, transparent)' }} />
-
-      {/* Main card */}
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-        style={{ background: 'linear-gradient(135deg, rgba(30,27,75,0.95), rgba(15,10,40,0.98))', backdropFilter: 'blur(20px)' }}>
-
-        {/* Window chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
-          <div className="w-3 h-3 rounded-full" style={{ background: '#EF4444' }} />
-          <div className="w-3 h-3 rounded-full" style={{ background: '#F59E0B' }} />
-          <div className="w-3 h-3 rounded-full" style={{ background: '#10B981' }} />
-          <div className="flex-1 mx-3 h-5 rounded-full border border-white/10 flex items-center px-3">
-            <span className="text-xs text-white/30 font-mono">app.intellmeet.ai/dashboard</span>
-          </div>
-        </div>
-
-        <div className="p-5 space-y-4">
-          {/* Header row */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-white font-bold text-sm">Good Morning, Arjun 👋</div>
-              <div className="text-white/40 text-xs mt-0.5">Saturday, June 14, 2026</div>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}>
-              <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              + New Meeting
-            </div>
-          </div>
-
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 gap-2.5">
-            {[
-              { label: 'Meetings', value: '48', color: '#7C3AED', icon: '📅' },
-              { label: 'Tasks Done', value: '124', color: '#06B6D4', icon: '✅' },
-              { label: 'AI Time Saved', value: '36h', color: '#10B981', icon: '⚡' },
-              { label: 'Team Size', value: '12', color: '#F59E0B', icon: '👥' },
-            ].map(s => (
-              <div key={s.label} className="rounded-xl p-3 border border-white/5"
-                style={{ background: 'rgba(255,255,255,0.04)' }}>
-                <div className="text-xs text-white/40 mb-1">{s.icon} {s.label}</div>
-                <div className="text-white font-bold text-lg">{s.value}</div>
-                <div className="text-xs mt-0.5" style={{ color: s.color }}>↑ this month</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Meeting list preview */}
-          <div className="rounded-xl border border-white/5 overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <div className="px-3 py-2 border-b border-white/5">
-              <span className="text-white/60 text-xs font-semibold">Upcoming Meetings</span>
-            </div>
-            {[
-              { title: 'Q3 Product Roadmap', time: 'Today 2:00 PM', badge: '● LIVE', badgeColor: '#EF4444' },
-              { title: 'Sprint Planning', time: 'Tomorrow 10:00 AM', badge: 'SOON', badgeColor: '#F59E0B' },
-            ].map((m, i) => (
-              <div key={i} className="px-3 py-2.5 flex items-center justify-between border-b border-white/5 last:border-0">
-                <div>
-                  <div className="text-white text-xs font-semibold">{m.title}</div>
-                  <div className="text-white/30 text-xs mt-0.5">{m.time}</div>
-                </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-md"
-                  style={{ color: m.badgeColor, background: `${m.badgeColor}18` }}>
-                  {m.badge}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* AI summary preview */}
-          <div className="rounded-xl p-3 border border-purple-500/20"
-            style={{ background: 'rgba(124,58,237,0.08)' }}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-xs">🤖</span>
-              <span className="text-xs font-bold text-purple-300">AI Summary Ready</span>
-              <span className="ml-auto text-xs text-purple-400/60">just now</span>
-            </div>
-            <div className="space-y-1">
-              {['Team approved Q3 roadmap with Aug 15 deadline', 'Budget increased 20% for campaign'].map((t, i) => (
-                <div key={i} className="flex gap-2">
-                  <div className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#A78BFA' }} />
-                  <span className="text-xs text-white/50 leading-relaxed">{t}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating badge */}
-      <div className="absolute -top-3 -right-3 bg-white rounded-xl shadow-xl px-3 py-2 flex items-center gap-2"
-        style={{ animation: 'float 4s ease-in-out infinite 1s' }}>
-        <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
-          <CheckSquare size={12} className="text-white" />
-        </div>
-        <div>
-          <div className="text-xs font-bold text-slate-800">3 tasks extracted</div>
-          <div className="text-xs text-slate-400">by AI</div>
-        </div>
-      </div>
-
-      {/* Floating badge 2 */}
-      <div className="absolute -bottom-3 -left-3 bg-white rounded-xl shadow-xl px-3 py-2 flex items-center gap-2"
-        style={{ animation: 'float 5s ease-in-out infinite 0.5s' }}>
-        <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}>
-          <Zap size={12} className="text-white" />
-        </div>
-        <div>
-          <div className="text-xs font-bold text-slate-800">36 hrs saved</div>
-          <div className="text-xs text-slate-400">this month</div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Navbar ───────────────────────────────────────────────────────────────
-
-function Navbar({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
+export default function LandingPage() {
+  const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
+  const [activeFeature, setActiveFeature] = useState(0)
 
+  // Redirect if already logged in
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', fn, { passive: true })
-    return () => window.removeEventListener('scroll', fn)
+    if (localStorage.getItem('token')) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [navigate])
+
+  // Track page scroll to apply background to navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const scrollTo = (id: string) => {
@@ -279,525 +51,552 @@ function Navbar({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
   }
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-      style={{
-        background: scrolled ? 'rgba(10,7,28,0.92)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(16px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex items-center gap-2.5 cursor-pointer">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #7C3AED, #06B6D4)' }}>
-            <Bot size={20} className="text-white" />
+    <div className="min-h-screen overflow-x-hidden text-slate-100" style={{ background: '#0a0f1a', fontFamily: "'Inter', sans-serif" }}>
+      {/* ── Custom CSS Animations & 3D rules ── */}
+      <style>{`
+        @keyframes float-mockup {
+          0% { transform: perspective(1200px) rotateX(12deg) rotateY(-10deg) rotateZ(1deg) translateY(0px); }
+          100% { transform: perspective(1200px) rotateX(12deg) rotateY(-10deg) rotateZ(1deg) translateY(-14px); }
+        }
+        .float-mockup {
+          animation: float-mockup 4s ease-in-out infinite alternate;
+        }
+        .nav-scrolled {
+          backdrop-filter: blur(16px);
+          background-color: rgba(10, 15, 26, 0.85);
+          border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+        }
+        .step-card {
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .step-card:hover {
+          transform: perspective(1000px) rotateY(6deg) translateY(-4px);
+          border-color: rgba(59, 130, 246, 0.4);
+          box-shadow: 0 15px 35px rgba(59, 130, 246, 0.12);
+        }
+        .feature-card {
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+          transform: translateY(-8px);
+          border-color: rgba(59, 130, 246, 0.45);
+          box-shadow: 0 20px 40px rgba(59, 130, 246, 0.18);
+        }
+        .demo-video-thumb {
+          background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(10,15,26,0.95) 100%);
+        }
+        .glow-blue {
+          box-shadow: 0 0 30px rgba(59, 130, 246, 0.25);
+        }
+      `}</style>
+
+      {/* ── NAVBAR ── */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'nav-scrolled py-3 shadow-lg' : 'py-5 bg-transparent'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          {/* Logo */}
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2.5 cursor-pointer group"
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-blue-600 transition-all duration-300 group-hover:scale-105"
+                 style={{ boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)' }}>
+              <Video size={18} className="text-white" />
+            </div>
+            <span className="text-white font-bold text-xl tracking-tight">
+              IntellMeet<span className="text-blue-500">.</span>
+            </span>
+          </button>
+
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-2">
+            {[
+              { label: 'Features', id: 'features' },
+              { label: 'How it Works', id: 'how-it-works' },
+              { label: 'Demo', id: 'demo' },
+            ].map(({ label, id }) => (
+              <button
+                key={label}
+                onClick={() => scrollTo(id)}
+                className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5 cursor-pointer"
+              >
+                {label}
+              </button>
+            ))}
           </div>
-          <span className="text-white font-bold text-xl">IntellMeet</span>
-        </button>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-1">
-          {[
-            { label: 'Features', id: 'features' },
-            { label: 'How it Works', id: 'how-it-works' },
-            { label: 'Pricing', id: 'cta' },
-          ].map(({ label, id }) => (
+          {/* CTA Buttons */}
+          <div className="hidden md:flex items-center gap-4">
             <button
-              key={label}
-              onClick={() => scrollTo(id)}
-              className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/5 cursor-pointer"
+              onClick={() => navigate('/login')}
+              className="text-sm font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
             >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* CTA buttons */}
-        <div className="hidden md:flex items-center gap-3">
-          <button
-            id="navbar-signin"
-            onClick={() => navigate('/login')}
-            className="px-4 py-2 text-sm font-semibold text-white border border-white/20 rounded-xl hover:bg-white/5 hover:border-white/40 transition-all duration-200 cursor-pointer"
-          >
-            Sign In
-          </button>
-          <button
-            id="navbar-get-started"
-            onClick={() => navigate('/login')}
-            className="px-5 py-2 text-sm font-semibold text-white rounded-xl transition-all duration-200 hover:opacity-90 hover:scale-[1.03] shadow-lg cursor-pointer relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
-          >
-            <span className="relative z-10">Get Started</span>
-          </button>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden text-white p-2 cursor-pointer"
-          onClick={() => setMobileOpen(o => !o)}
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden px-6 pb-5 space-y-2 border-t border-white/10"
-          style={{ background: 'rgba(10,7,28,0.97)', backdropFilter: 'blur(16px)' }}>
-          {['features', 'how-it-works', 'cta'].map((id, i) => (
-            <button key={id} onClick={() => scrollTo(id)}
-              className="block w-full text-left px-4 py-2.5 text-sm text-white/70 hover:text-white transition-colors cursor-pointer">
-              {['Features', 'How it Works', 'Pricing'][i]}
-            </button>
-          ))}
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => navigate('/login')}
-              className="flex-1 py-2.5 text-sm font-semibold text-white border border-white/20 rounded-xl cursor-pointer">
               Sign In
             </button>
-            <button onClick={() => navigate('/login')}
-              className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}>
+            <button
+              onClick={() => navigate('/register')}
+              className="px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              style={{
+                border: '1px solid rgba(59, 130, 246, 0.4)',
+                background: 'rgba(59, 130, 246, 0.1)',
+                boxShadow: '0 0 15px rgba(59, 130, 246, 0.15)'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 25px rgba(59, 130, 246, 0.4)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.15)' }}
+            >
               Get Started
             </button>
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden text-white p-2 cursor-pointer"
+            onClick={() => setMobileOpen(o => !o)}
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
-      )}
-    </nav>
-  )
-}
 
-// ─── Landing Page ─────────────────────────────────────────────────────────
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div className="md:hidden px-6 pb-6 pt-2 space-y-2 border-b border-blue-900/20"
+               style={{ background: 'rgba(10, 15, 26, 0.98)', backdropFilter: 'blur(16px)' }}>
+            {['features', 'how-it-works', 'demo'].map((id, i) => (
+              <button 
+                key={id} 
+                onClick={() => scrollTo(id)}
+                className="block w-full text-left px-4 py-3 text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                {['Features', 'How it Works', 'Watch Demo'][i]}
+              </button>
+            ))}
+            <div className="flex gap-3 pt-3">
+              <button 
+                onClick={() => navigate('/login')}
+                className="flex-1 py-3 text-sm font-semibold text-center text-slate-300 border border-white/10 rounded-xl cursor-pointer hover:bg-white/5"
+              >
+                Sign In
+              </button>
+              <button 
+                onClick={() => navigate('/register')}
+                className="flex-1 py-3 text-sm font-bold text-center text-white rounded-xl cursor-pointer"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}
+              >
+                Get Started
+              </button>
+            </div>
+          </div>
+        )}
+      </nav>
 
-export default function LandingPage() {
-  const navigate = useNavigate()
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (localStorage.getItem('token')) navigate('/dashboard', { replace: true })
-  }, [navigate])
-
-  const featuresReveal = useScrollReveal()
-  const statsReveal = useScrollReveal(0.1)
-  const stepsReveal = useScrollReveal()
-  const testimonialsReveal = useScrollReveal()
-  const ctaReveal = useScrollReveal()
-
-  return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: '#060412', color: 'white', fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <Navbar navigate={navigate} />
-
-      {/* ── HERO ──────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center pt-20 pb-16 overflow-hidden">
-        {/* Animated background */}
+      {/* ── HERO SECTION ── */}
+      <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">
+        {/* Glow Spheres */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
-            style={{ background: 'radial-gradient(circle, #7C3AED, transparent)' }} />
-          <div className="absolute top-1/3 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15"
-            style={{ background: 'radial-gradient(circle, #06B6D4, transparent)' }} />
-          <div className="absolute bottom-1/4 left-1/3 w-64 h-64 rounded-full blur-3xl opacity-10"
-            style={{ background: 'radial-gradient(circle, #5B21B6, transparent)' }} />
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
-            }} />
+          <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] rounded-full blur-3xl opacity-20"
+               style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
+          <div className="absolute top-[20%] right-[5%] w-[500px] h-[500px] rounded-full blur-3xl opacity-15"
+               style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)' }} />
+          {/* Subtle Grid overlay */}
+          <div className="absolute inset-0 opacity-[0.02]"
+               style={{
+                 backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
+                 backgroundSize: '80px 80px',
+               }} />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left copy */}
-          <div style={{ animation: 'fade-in-up-lg 0.8s ease-out forwards' }}>
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold mb-6"
-              style={{ borderColor: 'rgba(124,58,237,0.4)', background: 'rgba(124,58,237,0.1)', color: '#A78BFA' }}>
-              <Sparkles size={12} />
-              AI-Powered Meeting Intelligence
+          {/* Hero text */}
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-900/30 text-xs font-semibold"
+                 style={{ background: 'rgba(59, 130, 246, 0.08)', color: '#60a5fa' }}>
+              <Sparkles size={12} className="animate-spin" style={{ animationDuration: '3s' }} />
+              AI-Powered Next-Gen Meetings
             </div>
 
-            <h1 className="text-5xl lg:text-6xl font-black leading-tight mb-6"
-              style={{ letterSpacing: '-0.03em' }}>
-              Meetings That{' '}
+            <h1 className="text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white">
+              Meetings that think. <br />
               <span style={{
-                background: 'linear-gradient(135deg, #A78BFA, #06B6D4)',
+                background: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}>
-                Actually Get
+                So you don't have to.
               </span>
-              {' '}Things Done
             </h1>
 
-            <p className="text-lg text-white/60 leading-relaxed mb-8 max-w-lg">
-              AI-powered video meetings with automatic transcription, smart summaries,
-              and action item tracking — so your team can focus on what matters.
+            <p className="text-lg text-slate-400 leading-relaxed max-w-lg">
+              IntellMeet automatically transcribes, summarizes, and extracts action items from your video calls in real-time. Boost collaboration with built-in Kanban boards and performance analytics.
             </p>
 
-            <div className="flex flex-wrap gap-4 mb-10">
+            <div className="flex flex-wrap gap-4">
               <button
-                id="hero-start-trial"
                 onClick={() => navigate('/register')}
-                className="group flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-bold text-base transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl shadow-purple-900/40 shadow-lg cursor-pointer relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+                className="flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-base transition-all duration-300 hover:scale-[1.02] hover:opacity-95 shadow-lg shadow-blue-500/20 cursor-pointer"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}
               >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }} />
-                <span className="relative">Start Free Trial</span>
-                <ArrowRight size={18} className="relative group-hover:translate-x-0.5 transition-transform" />
+                Start Free Meeting
+                <ArrowRight size={18} />
               </button>
 
               <button
-                id="hero-watch-demo"
-                onClick={() => navigate('/login')}
-                className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-base border transition-all duration-200 hover:bg-white/5 hover:scale-[1.02] cursor-pointer"
-                style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)' }}
+                onClick={() => setIsVideoModalOpen(true)}
+                className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base border border-slate-700 text-slate-200 hover:bg-slate-800/50 hover:border-slate-500 transition-all duration-300 cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center">
-                  <Play size={12} fill="white" />
-                </div>
+                <Play size={16} className="text-blue-500" fill="#3b82f6" />
                 Watch Demo
               </button>
             </div>
 
-            {/* Social proof row */}
-            <div className="flex items-center gap-4">
-              <div className="flex -space-x-2.5">
-                {['#7C3AED', '#06B6D4', '#10B981', '#F59E0B'].map((c, i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-white"
-                    style={{ background: c }}>
-                    {['A', 'S', 'M', 'P'][i]}
-                  </div>
-                ))}
-              </div>
+            {/* Micro stats */}
+            <div className="pt-4 flex items-center gap-6 border-t border-slate-900/50 max-w-md">
               <div>
-                <div className="flex items-center gap-1 mb-0.5">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="#F59E0B" style={{ color: '#F59E0B' }} />)}
-                </div>
-                <span className="text-xs text-white/50">Loved by <span className="text-white/80 font-semibold">500+</span> enterprise teams</span>
+                <div className="text-2xl font-extrabold text-white">99.9%</div>
+                <div className="text-xs text-slate-500 mt-0.5">Uptime SLA</div>
+              </div>
+              <div className="w-px h-8 bg-slate-800" />
+              <div>
+                <div className="text-2xl font-extrabold text-white">35m+</div>
+                <div className="text-xs text-slate-500 mt-0.5">Minutes Saved</div>
+              </div>
+              <div className="w-px h-8 bg-slate-800" />
+              <div>
+                <div className="text-2xl font-extrabold text-white">100%</div>
+                <div className="text-xs text-slate-500 mt-0.5">Secure Encryption</div>
               </div>
             </div>
           </div>
 
-          {/* Right mockup */}
-          <div style={{ animation: 'fade-in-up-lg 0.8s ease-out 0.2s both' }}>
-            <DashboardMockup />
-          </div>
-        </div>
+          {/* 3D Floating Mockup */}
+          <div className="relative flex items-center justify-center">
+            {/* Background Glow */}
+            <div className="absolute w-[350px] h-[350px] rounded-full bg-blue-500/10 blur-3xl -z-10" />
+            
+            {/* The 3D Mockup Container */}
+            <div className="float-mockup w-full max-w-lg aspect-[1.58] rounded-2xl border border-blue-900/35 overflow-hidden shadow-2xl relative glow-blue"
+                 style={{
+                   background: 'linear-gradient(135deg, #0f172a 0%, #020617 100%)',
+                 }}>
+              
+              {/* Fake Chrome Bar */}
+              <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-slate-900 bg-slate-950/60">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                <div className="flex-1 mx-3 h-5 rounded-full bg-slate-900/80 flex items-center px-3 border border-white/5">
+                  <span className="text-[10px] text-slate-500 font-mono">app.intellmeet.ai/meeting/q3-review</span>
+                </div>
+              </div>
 
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-          style={{ background: 'linear-gradient(transparent, #060412)' }} />
-      </section>
-
-      {/* ── STATS BAR ─────────────────────────────────────────────────── */}
-      <section ref={statsReveal.ref} className="py-16 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="rounded-2xl border border-white/8 overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(12px)' }}>
-            <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-white/8">
-              {stats.map(({ value, label, icon: Icon }, i) => (
-                <div
-                  key={label}
-                  className="px-8 py-8 text-center"
-                  style={{
-                    animation: statsReveal.visible ? `count-up 0.6s ease-out ${i * 0.1}s both` : 'none',
-                    opacity: statsReveal.visible ? undefined : 0,
-                  }}
-                >
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: 'rgba(124,58,237,0.15)' }}>
-                      <Icon size={18} style={{ color: '#A78BFA' }} />
+              {/* Fake Meeting UI Grid */}
+              <div className="p-4 h-[calc(100%-41px)] flex flex-col justify-between space-y-3">
+                {/* 3 Participant grid */}
+                <div className="grid grid-cols-3 gap-2.5 flex-1 min-h-0">
+                  {/* Tile 1 */}
+                  <div className="rounded-xl border border-white/5 bg-slate-950/40 relative overflow-hidden flex flex-col items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-lg">AS</div>
+                    <span className="text-[10px] text-slate-400 mt-2 font-medium">Arjun (You)</span>
+                    <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/40 text-[9px] flex items-center gap-1 text-emerald-400">
+                      <Mic size={8} /> Speaking
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-white mb-1"
-                    style={{
-                      background: 'linear-gradient(135deg, #A78BFA, #06B6D4)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}>
-                    {value}
+                  {/* Tile 2 */}
+                  <div className="rounded-xl border border-white/5 bg-slate-950/40 relative overflow-hidden flex flex-col items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-xs font-bold text-white shadow-lg">PM</div>
+                    <span className="text-[10px] text-slate-400 mt-2 font-medium">Priya Mehta</span>
+                    <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/40 text-[9px] flex items-center gap-1 text-slate-400">
+                      <Mic size={8} /> Muted
+                    </div>
                   </div>
-                  <div className="text-sm text-white/50 font-medium">{label}</div>
+                  {/* Tile 3 */}
+                  <div className="rounded-xl border border-white/5 bg-slate-950/40 relative overflow-hidden flex flex-col items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-xs font-bold text-white shadow-lg">RV</div>
+                    <span className="text-[10px] text-slate-400 mt-2 font-medium">Rahul Verma</span>
+                    <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/40 text-[9px] flex items-center gap-1 text-slate-400">
+                      <Mic size={8} /> Active
+                    </div>
+                  </div>
                 </div>
-              ))}
+
+                {/* AI live transcript bar */}
+                <div className="rounded-xl p-3 border border-blue-500/25 bg-blue-500/5 relative overflow-hidden">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Sparkles size={10} className="text-blue-400 animate-pulse" />
+                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-blue-400">Live AI Transcription</span>
+                  </div>
+                  <p className="text-[10px] text-slate-300 leading-relaxed italic">
+                    "Priya: Let's adjust the Q3 release target to August 15th to accommodate the security audit."
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES ──────────────────────────────────────────────────── */}
+      {/* ── HOW IT WORKS ── */}
+      <section id="how-it-works" className="py-24 bg-slate-950/40 border-y border-slate-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-blue-500">Overview</span>
+            <h2 className="text-3xl lg:text-4xl font-black text-white mt-2">Meetings simplified in 3 steps</h2>
+            <p className="text-slate-400 text-sm mt-3">
+              Experience the power of intelligence applied automatically to every discussion.
+            </p>
+          </div>
+
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Dashed Connector Line */}
+            <div className="hidden md:block absolute top-20 left-1/6 right-1/6 h-[1.5px] border-t-2 border-dashed border-blue-900/30 -z-10" />
+
+            {[
+              {
+                step: '01',
+                title: 'Join or schedule a meeting',
+                desc: 'Quickly spin up a room in seconds. Invite team members with simple invite URLs.',
+                icon: Video,
+              },
+              {
+                step: '02',
+                title: 'AI transcribes in real-time',
+                desc: 'IntellMeet listens, identifies speakers, and writes down every detail as it happens.',
+                icon: Mic,
+              },
+              {
+                step: '03',
+                title: 'Get summary + tasks instantly',
+                desc: 'AI digests the transcript, drafts a summary, and creates ready-to-use Kanban tasks.',
+                icon: Sparkles,
+              },
+            ].map(({ step, title, desc, icon: Icon }) => (
+              <div
+                key={step}
+                className="step-card bg-slate-900/30 border border-slate-800 p-8 rounded-2xl text-center relative overflow-hidden flex flex-col items-center group cursor-default"
+              >
+                <div className="absolute top-4 right-6 text-sm font-black text-blue-500/20 group-hover:text-blue-500/35 transition-colors">
+                  {step}
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 text-blue-400 group-hover:scale-105 transition-transform duration-300">
+                  <Icon size={24} />
+                </div>
+                <h3 className="font-bold text-white text-base mb-3">{title}</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES GRID ── */}
       <section id="features" className="py-24">
         <div className="max-w-7xl mx-auto px-6">
-          <div ref={featuresReveal.ref}
-            style={{ animation: featuresReveal.visible ? 'fade-in-up 0.6s ease-out' : 'none', opacity: featuresReveal.visible ? 1 : 0 }}>
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold mb-4"
-                style={{ borderColor: 'rgba(124,58,237,0.3)', background: 'rgba(124,58,237,0.08)', color: '#A78BFA' }}>
-                <Zap size={11} /> Everything You Need
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-blue-500">Core Features</span>
+            <h2 className="text-3xl lg:text-4xl font-black text-white mt-2">Smarter video workflows</h2>
+            <p className="text-slate-400 text-sm mt-3">
+              Focus on the conversations while IntellMeet automates administrative tracking.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                icon: Monitor,
+                color: '#3b82f6',
+                bg: 'rgba(59, 130, 246, 0.08)',
+                border: 'rgba(59, 130, 246, 0.15)',
+                title: 'Real-time video & audio',
+                desc: 'Enjoy clear WebRTC-powered meetings with integrated live chat and dynamic participant presence status indicators.'
+              },
+              {
+                icon: Bot,
+                color: '#a855f7',
+                bg: 'rgba(168, 85, 247, 0.08)',
+                border: 'rgba(168, 85, 247, 0.15)',
+                title: 'AI transcripts & summaries',
+                desc: 'Generate smart summaries, meeting details, and full transcriptions powered by OpenAI integration instantly.'
+              },
+              {
+                icon: CheckSquare,
+                color: '#14b8a6',
+                bg: 'rgba(20, 184, 166, 0.08)',
+                border: 'rgba(20, 184, 166, 0.15)',
+                title: 'Auto task extraction',
+                desc: 'Surfaces tasks, assignees, and deadlines automatically, creating cards on your personalized task board.'
+              },
+              {
+                icon: BarChart3,
+                color: '#f59e0b',
+                bg: 'rgba(245, 158, 17, 0.08)',
+                border: 'rgba(245, 158, 17, 0.15)',
+                title: 'Team productivity analytics',
+                desc: 'Explore meeting distributions, task completion progress charts, and active performance contributors.'
+              }
+            ].map(({ icon: Icon, color, bg, border, title, desc }) => (
+              <div
+                key={title}
+                className="feature-card bg-slate-900/20 border border-slate-800/80 p-8 rounded-2xl flex flex-col sm:flex-row items-start gap-5 cursor-default"
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                     style={{ background: bg, border: `1px solid ${border}`, color }}>
+                  <Icon size={20} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-bold text-white text-base">{title}</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+                </div>
               </div>
-              <h2 className="text-4xl lg:text-5xl font-black mb-4" style={{ letterSpacing: '-0.02em' }}>
-                Built for Modern{' '}
-                <span style={{
-                  background: 'linear-gradient(135deg, #A78BFA, #06B6D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>Teams</span>
-              </h2>
-              <p className="text-white/50 text-lg max-w-xl mx-auto">
-                Every feature you need to run efficient, productive meetings — powered by AI.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {features.map(({ icon: Icon, title, desc, color, bg, border }, i) => (
-                <div
-                  key={title}
-                  className="group p-6 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-default"
-                  style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    borderColor: 'rgba(255,255,255,0.06)',
-                    animation: featuresReveal.visible ? `fade-in-up 0.5s ease-out ${i * 0.07}s both` : 'none',
-                  }}
-                >
-                  <div className="relative mb-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                      style={{ background: bg, border: `1px solid ${border}` }}>
-                      <Icon size={22} style={{ color }} />
-                    </div>
-                  </div>
-                  <h3 className="font-bold text-white text-base mb-2">{title}</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">{desc}</p>
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ color }}>
-                    Learn more <ChevronRight size={13} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-24 relative overflow-hidden">
-        {/* BG accent */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl opacity-8"
-            style={{ background: 'radial-gradient(circle, #7C3AED, transparent)' }} />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6">
-          <div ref={stepsReveal.ref}>
-            <div className="text-center mb-16"
-              style={{ animation: stepsReveal.visible ? 'fade-in-up 0.6s ease-out' : 'none', opacity: stepsReveal.visible ? 1 : 0 }}>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold mb-4"
-                style={{ borderColor: 'rgba(6,182,212,0.3)', background: 'rgba(6,182,212,0.08)', color: '#67E8F9' }}>
-                <Clock size={11} /> Simple 3-Step Process
-              </div>
-              <h2 className="text-4xl lg:text-5xl font-black mb-4" style={{ letterSpacing: '-0.02em' }}>
-                How{' '}
-                <span style={{
-                  background: 'linear-gradient(135deg, #A78BFA, #06B6D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>IntellMeet</span>{' '}Works
-              </h2>
-              <p className="text-white/50 text-lg max-w-lg mx-auto">
-                From start to summary in three effortless steps.
-              </p>
-            </div>
-
-            {/* Steps */}
-            <div className="relative grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Connector line */}
-              <div className="hidden md:block absolute top-16 left-1/3 right-1/3 h-px"
-                style={{ background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.4), rgba(6,182,212,0.4), transparent)' }} />
-
-              {steps.map(({ step, title, desc, icon: Icon, color }, i) => (
-                <div key={step}
-                  className="relative flex flex-col items-center text-center p-8 rounded-2xl border border-white/6 hover:-translate-y-1 transition-all duration-300 group"
-                  style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    animation: stepsReveal.visible ? `fade-in-up 0.55s ease-out ${i * 0.12}s both` : 'none',
-                  }}
-                >
-                  {/* Step number */}
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-black px-2.5 py-1 rounded-full border"
-                    style={{ background: '#060412', borderColor: color, color }}>
-                    {step}
-                  </div>
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-transform group-hover:scale-110"
-                    style={{ background: `linear-gradient(135deg, ${color}20, ${color}10)`, border: `1px solid ${color}30` }}>
-                    <Icon size={28} style={{ color }} />
-                  </div>
-                  <h3 className="font-bold text-white text-lg mb-3">{title}</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ─────────────────────────────────────────────── */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div ref={testimonialsReveal.ref}>
-            <div className="text-center mb-14"
-              style={{ animation: testimonialsReveal.visible ? 'fade-in-up 0.6s ease-out' : 'none', opacity: testimonialsReveal.visible ? 1 : 0 }}>
-              <h2 className="text-4xl font-black mb-3" style={{ letterSpacing: '-0.02em' }}>
-                Loved by{' '}
-                <span style={{
-                  background: 'linear-gradient(135deg, #A78BFA, #06B6D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>Teams Everywhere</span>
-              </h2>
-              <p className="text-white/50">Don't take our word for it.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {testimonials.map(({ name, role, text, rating }, i) => (
-                <div key={name}
-                  className="p-6 rounded-2xl border border-white/6 hover:-translate-y-1 transition-all duration-300 group"
-                  style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    animation: testimonialsReveal.visible ? `fade-in-up 0.5s ease-out ${i * 0.1}s both` : 'none',
-                  }}
-                >
-                  <div className="flex gap-0.5 mb-4">
-                    {[...Array(rating)].map((_, j) => <Star key={j} size={14} fill="#F59E0B" style={{ color: '#F59E0B' }} />)}
-                  </div>
-                  <p className="text-white/70 text-sm leading-relaxed mb-5 italic">"{text}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                      style={{ background: 'linear-gradient(135deg, #7C3AED, #06B6D4)' }}>
-                      {name[0]}
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-white">{name}</div>
-                      <div className="text-xs text-white/40">{role}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA SECTION ──────────────────────────────────────────────── */}
-      <section id="cta" className="py-24">
-        <div className="max-w-4xl mx-auto px-6">
-          <div ref={ctaReveal.ref}
-            style={{ animation: ctaReveal.visible ? 'scale-in 0.6s ease-out' : 'none', opacity: ctaReveal.visible ? 1 : 0 }}
+      {/* ── DEMO VIDEO SECTION ── */}
+      <section id="demo" className="py-24 bg-slate-950/40 border-y border-slate-900">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-blue-500">Product Tour</span>
+          <h2 className="text-3xl lg:text-4xl font-black text-white mt-2 mb-10">See IntellMeet in action</h2>
+          
+          {/* Video Placeholder Container */}
+          <div 
+            onClick={() => setIsVideoModalOpen(true)}
+            className="demo-video-thumb aspect-video rounded-2xl border border-blue-900/30 overflow-hidden shadow-2xl relative flex items-center justify-center group cursor-pointer"
           >
-            <div className="relative text-center rounded-3xl overflow-hidden p-16 border border-white/10"
-              style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.1))' }}>
-              {/* BG orbs */}
-              <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full blur-3xl opacity-25 pointer-events-none"
-                style={{ background: 'radial-gradient(circle, #7C3AED, transparent)' }} />
-              <div className="absolute -bottom-12 -left-12 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"
-                style={{ background: 'radial-gradient(circle, #06B6D4, transparent)' }} />
+            {/* Fake Thumbnail elements */}
+            <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center filter blur-[2px]" />
+            <div className="absolute inset-0 bg-slate-950/80" />
 
-              {/* Shimmer bar */}
-              <div className="absolute top-0 left-0 right-0 h-px overflow-hidden">
-                <div className="h-full w-1/3"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
-                    animation: 'shimmer 2.5s ease-in-out infinite',
-                  }} />
-              </div>
+            {/* Blurred UI mock in background */}
+            <div className="absolute w-[200px] h-[100px] rounded-lg bg-blue-500/5 border border-blue-500/10 backdrop-blur-md -top-6 -right-6 pointer-events-none" />
+            <div className="absolute w-[180px] h-[90px] rounded-lg bg-purple-500/5 border border-purple-500/10 backdrop-blur-md -bottom-8 -left-8 pointer-events-none" />
 
-              <div className="relative">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold mb-6"
-                  style={{ borderColor: 'rgba(124,58,237,0.4)', background: 'rgba(124,58,237,0.15)', color: '#A78BFA' }}>
-                  <Sparkles size={11} /> Start for Free Today
-                </div>
-                <h2 className="text-4xl lg:text-5xl font-black mb-4" style={{ letterSpacing: '-0.02em' }}>
-                  Ready to transform{' '}
-                  <span style={{
-                    background: 'linear-gradient(135deg, #A78BFA, #06B6D4)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}>your meetings?</span>
-                </h2>
-                <p className="text-white/60 text-lg mb-10 max-w-md mx-auto">
-                  Join 500+ enterprise teams running smarter meetings with IntellMeet AI.
-                </p>
+            {/* Play Button Icon */}
+            <div className="relative z-10 w-20 h-20 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center shadow-2xl transition-all duration-300 group-hover:scale-110"
+                 style={{ boxShadow: '0 0 30px rgba(59, 130, 246, 0.4)' }}>
+              <Play size={28} className="text-white ml-1.5" fill="white" />
+            </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button
-                    id="cta-get-started"
-                    onClick={() => navigate('/register')}
-                    className="group flex items-center justify-center gap-2 px-10 py-4 rounded-xl text-white font-bold text-base transition-all duration-200 hover:scale-[1.03] shadow-2xl cursor-pointer relative overflow-hidden"
-                    style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
-                  >
-                    <span>Get Started Free</span>
-                    <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="flex items-center justify-center gap-2 px-10 py-4 rounded-xl font-bold text-base border border-white/20 text-white/80 hover:bg-white/5 transition-all duration-200 cursor-pointer"
-                  >
-                    Sign In Instead
-                  </button>
-                </div>
+            {/* Details overlay */}
+            <div className="absolute bottom-4 left-6 text-left">
+              <span className="text-xs text-slate-400 font-medium">Watch 2 min summary video</span>
+            </div>
+          </div>
+          <p className="text-slate-500 text-xs mt-4">Full interactive demo coming soon</p>
+        </div>
+      </section>
 
-                <p className="mt-5 text-sm text-white/35 flex items-center justify-center gap-1.5">
-                  <Shield size={13} />
-                  No credit card required · Free forever plan · Cancel anytime
-                </p>
+      {/* ── STATS BAR ── */}
+      <section className="py-12 border-t border-blue-900/25 bg-slate-950/60 relative">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center">
+            <div>
+              <div className="text-3xl font-black text-white">2x</div>
+              <div className="text-xs text-slate-400 mt-1 uppercase tracking-wide">Faster follow-ups</div>
+            </div>
+            <div className="hidden md:block h-8 w-px bg-slate-800 mx-auto" />
+            <div>
+              <div className="text-3xl font-black text-white">100%</div>
+              <div className="text-xs text-slate-400 mt-1 uppercase tracking-wide">Auto-transcribed</div>
+            </div>
+            <div className="hidden md:block h-8 w-px bg-slate-800 mx-auto" />
+            <div>
+              <div className="text-3xl font-black text-white">0</div>
+              <div className="text-xs text-slate-400 mt-1 uppercase tracking-wide">Manual notes needed</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA SECTION ── */}
+      <section className="py-24">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-blue-950 p-12 rounded-3xl text-center relative overflow-hidden glow-blue">
+            <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-12 -left-12 w-64 h-64 rounded-full bg-purple-500/5 blur-3xl pointer-events-none" />
+
+            <div className="relative space-y-6 max-w-xl mx-auto">
+              <h2 className="text-3xl lg:text-4xl font-black text-white">
+                Ready to run smarter meetings?
+              </h2>
+              <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                Empower your squad with automatic action tracking, smart notes, and seamless WebRTC collaboration.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                <button
+                  onClick={() => navigate('/register')}
+                  className="px-8 py-3.5 rounded-xl text-white font-bold text-sm transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-blue-500/10 cursor-pointer"
+                  style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}
+                >
+                  Get Started Free
+                </button>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-8 py-3.5 rounded-xl font-bold text-sm border border-slate-700 text-slate-200 hover:bg-slate-800/40 hover:border-slate-500 transition-all duration-300 cursor-pointer"
+                >
+                  Sign In
+                </button>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ───────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/6 py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Logo + tagline */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #7C3AED, #06B6D4)' }}>
-                <Bot size={16} className="text-white" />
-              </div>
-              <div>
-                <div className="text-white font-bold">IntellMeet</div>
-                <div className="text-xs text-white/30">AI-Powered Meeting Intelligence</div>
-              </div>
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-slate-900 py-12 bg-slate-950/80">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-600">
+              <Video size={16} className="text-white" />
             </div>
+            <div className="text-left">
+              <div className="text-white font-bold text-sm">IntellMeet</div>
+              <div className="text-[10px] text-slate-500">AI-Powered Meeting Insights</div>
+            </div>
+          </div>
 
-            {/* Links */}
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              {['About', 'Features', 'Privacy', 'Terms', 'Contact'].map(link => (
-                <a key={link} href="#"
-                  className="text-sm text-white/40 hover:text-white/80 transition-colors">
-                  {link}
-                </a>
-              ))}
-            </div>
+          <div className="flex gap-6">
+            {['About', 'Features', 'Privacy', 'Contact'].map(link => (
+              <a key={link} href="#" className="text-xs text-slate-500 hover:text-white transition-colors">{link}</a>
+            ))}
+          </div>
 
-            {/* Copyright */}
-            <div className="text-xs text-white/25 text-center md:text-right">
-              © 2026 IntellMeet.<br />
-              <span className="text-white/20">Built for Zidio Development.</span>
-            </div>
+          <div className="text-xs text-slate-600 text-center md:text-right">
+            © 2026 IntellMeet. All rights reserved.<br />
+            <span className="text-[10px] text-slate-700">Built for Zidio Development.</span>
           </div>
         </div>
       </footer>
+
+      {/* ── DEMO VIDEO MODAL ── */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+          <div className="w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
+            <button 
+              onClick={() => setIsVideoModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-950/50 p-2 rounded-full cursor-pointer z-10 transition-colors"
+            >
+              <X size={18} />
+            </button>
+            <div className="aspect-video w-full relative flex flex-col items-center justify-center p-8 text-center bg-slate-950">
+              <div className="w-16 h-16 rounded-full bg-blue-600/10 flex items-center justify-center mb-4 text-blue-500">
+                <Sparkles size={28} className="animate-pulse" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">IntellMeet Interactive Video Guide</h3>
+              <p className="text-xs text-slate-400 max-w-md">
+                We are currently processing the finalized workflow footage. You can immediately get started by creating or scheduling a live meeting above.
+              </p>
+              <button 
+                onClick={() => { setIsVideoModalOpen(false); navigate('/register') }}
+                className="mt-6 px-6 py-2.5 rounded-lg text-white font-semibold text-xs shadow-md cursor-pointer"
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}
+              >
+                Sign Up & Test Live
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
