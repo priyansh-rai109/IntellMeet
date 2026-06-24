@@ -26,6 +26,7 @@
     "lucide-react": "^1.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.17.0",
     "recharts": "^3.8.1",
     "simple-peer": "^9.11.1",

@@ -43,7 +43,10 @@ module.exports = function registerSocketHandlers(io) {
 
     // ─── join-room ────────────────────────────────────────────────────────────
     socket.on('join-room', ({ roomId, userId, userName }) => {
-      if (!roomId || !userId) return;
+      if (!roomId || !userId || userId !== socket.data.userId) {
+        console.warn(`[Socket] Unauthorized join attempt for user ${userId} (socket: ${socket.id})`);
+        return;
+      }
 
       // Join the Socket.io room
       socket.join(roomId);

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Peer from 'simple-peer'
 import { Socket } from 'socket.io-client'
+import api from '../config/api'
 
 export interface PeerEntry {
   socketId: string
@@ -8,6 +9,8 @@ export interface PeerEntry {
   userName: string
   peer: Peer.Instance
   stream?: MediaStream
+  connectionState: 'connecting' | 'connected' | 'failed'
+  isInitiator: boolean
 }
 
 export interface UseWebRTCReturn {
@@ -15,17 +18,11 @@ export interface UseWebRTCReturn {
   peers: PeerEntry[]
   initLocalStream: () => Promise<MediaStream | null>
   destroyAll: () => void
+  retryPeerConnection: (socketId: string) => void
 }
 
 /**
- * useWebRTC — manages simple-peer instances and local media stream.
- *
- * Flow:
- *   1. Call initLocalStream() to acquire camera/mic.
- *   2. When `room-participants` fires (existing peers), create initiating offers.
- *   3. When `user-connected` fires (new peer), they will send an offer to us.
- *   4. Relay offers/answers/ICE via socket events.
- *   5. On stream event, store the remote stream in peers state for rendering.
+ * useWebRTC — manages simple-peer instances and local media stream with TURN support.
  */
 export function useWebRTC(
   socket: Socket,
@@ -36,9 +33,39 @@ export function useWebRTC(
   const [localStream, setLocalStream] = useState<MediaStream | null>(null)
   const [peers, setPeers] = useState<PeerEntry[]>([])
 
-  // Refs to avoid stale closures in socket callbacks
   const localStreamRef = useRef<MediaStream | null>(null)
   const peersRef = useRef<Map<string, PeerEntry>>(new Map())
+  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+
+  // Dynamic ICE/TURN configuration (defaults to Google STUN fallback)
+  const iceServersRef = useRef<RTCIceServer[]>([
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+  ])
+
+  // Fetch TURN credentials from backend on hook mount
+  useEffect(() => {
+    api.get('/webrtc/turn-credentials')
+      .then(res => {
+        if (res.data && res.data.iceServers) {
+          iceServersRef.current = res.data.iceServers
+          console.log('[WebRTC] Dynamically loaded ICE servers config (STUN/TURN)');
+        }
+      })
+      .catch(err => {
+        console.warn('[WebRTC] Failed to fetch TURN credentials, using fallback STUN:', err.message)
+      })
+  }, [])
+
+  // Helper to update peer state attributes
+  const updatePeerState = useCallback((socketId: string, updates: Partial<PeerEntry>) => {
+    const entry = peersRef.current.get(socketId)
+    if (entry) {
+      const updated = { ...entry, ...updates }
+      peersRef.current.set(socketId, updated)
+      setPeers(Array.from(peersRef.current.values()))
+    }
+  }, [])
 
   // ─── Acquire local media ────────────────────────────────────────────────────
   const initLocalStream = useCallback(async (): Promise<MediaStream | null> => {
@@ -65,14 +92,17 @@ export function useWebRTC(
       initiator: boolean,
       stream: MediaStream | null
     ): Peer.Instance => {
+      // Clear any existing connection timeout for this peer first
+      if (timeoutsRef.current.has(remoteSocketId)) {
+        clearTimeout(timeoutsRef.current.get(remoteSocketId))
+        timeoutsRef.current.delete(remoteSocketId)
+      }
+
       const peerOptions: Peer.Options = {
         initiator,
-        trickle: true, // Trickle ICE for faster connection
+        trickle: true,
         config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-          ],
+          iceServers: iceServersRef.current,
         },
       }
 
@@ -82,28 +112,63 @@ export function useWebRTC(
 
       const peer = new Peer(peerOptions)
 
+      // Set connection monitoring timeout (15 seconds)
+      const connTimeout = setTimeout(() => {
+        const currentPeer = peersRef.current.get(remoteSocketId)
+        if (currentPeer && currentPeer.connectionState === 'connecting') {
+          console.warn(`[WebRTC] Connection timeout to peer ${remoteUserName} (${remoteSocketId})`);
+          updatePeerState(remoteSocketId, { connectionState: 'failed' })
+          // Trigger self-healing auto-retry in 5 seconds
+          setTimeout(() => {
+            const recheck = peersRef.current.get(remoteSocketId)
+            if (recheck && recheck.connectionState === 'failed') {
+              retryPeerConnection(remoteSocketId)
+            }
+          }, 5000)
+        }
+      }, 15000)
+
+      timeoutsRef.current.set(remoteSocketId, connTimeout)
+
       peer.on('signal', (signalData) => {
         if (signalData.type === 'offer') {
           socket.emit('webrtc-offer', { to: remoteSocketId, offer: signalData })
         } else if (signalData.type === 'answer') {
           socket.emit('webrtc-answer', { to: remoteSocketId, answer: signalData })
         } else {
-          // ICE candidate
           socket.emit('ice-candidate', { to: remoteSocketId, candidate: signalData })
         }
       })
 
+      peer.on('connect', () => {
+        console.log(`[WebRTC] Connected successfully to peer ${remoteUserName}`)
+        const timeout = timeoutsRef.current.get(remoteSocketId)
+        if (timeout) clearTimeout(timeout)
+        updatePeerState(remoteSocketId, { connectionState: 'connected' })
+      })
+
       peer.on('stream', (remoteStream) => {
-        peersRef.current.get(remoteSocketId) &&
-          updatePeerStream(remoteSocketId, remoteStream)
+        updatePeerState(remoteSocketId, { stream: remoteStream })
       })
 
       peer.on('error', (err) => {
-        console.error(`[WebRTC] Peer error with ${remoteSocketId}:`, err)
-        removePeer(remoteSocketId)
+        console.error(`[WebRTC] Peer connection error with ${remoteUserName}:`, err)
+        const timeout = timeoutsRef.current.get(remoteSocketId)
+        if (timeout) clearTimeout(timeout)
+        updatePeerState(remoteSocketId, { connectionState: 'failed' })
+
+        // Trigger self-healing auto-retry in 5 seconds
+        setTimeout(() => {
+          const recheck = peersRef.current.get(remoteSocketId)
+          if (recheck && recheck.connectionState === 'failed') {
+            retryPeerConnection(remoteSocketId)
+          }
+        }, 5000)
       })
 
       peer.on('close', () => {
+        const timeout = timeoutsRef.current.get(remoteSocketId)
+        if (timeout) clearTimeout(timeout)
         removePeer(remoteSocketId)
       })
 
@@ -112,6 +177,8 @@ export function useWebRTC(
         userId: remoteUserId,
         userName: remoteUserName,
         peer,
+        connectionState: 'connecting',
+        isInitiator: initiator,
       }
 
       peersRef.current.set(remoteSocketId, entry)
@@ -120,17 +187,24 @@ export function useWebRTC(
       return peer
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [socket]
+    [socket, updatePeerState]
   )
 
-  const updatePeerStream = (socketId: string, stream: MediaStream) => {
+  // ─── Retry Peer Connection (Self-Healing) ──────────────────────────────────
+  const retryPeerConnection = useCallback((socketId: string) => {
     const entry = peersRef.current.get(socketId)
-    if (entry) {
-      const updated = { ...entry, stream }
-      peersRef.current.set(socketId, updated)
-      setPeers(Array.from(peersRef.current.values()))
-    }
-  }
+    if (!entry) return
+
+    console.log(`[WebRTC] Attempting to reconnect/retry peer connection with ${entry.userName}`)
+    
+    // Destroy previous peer instance to release resources
+    try {
+      entry.peer.destroy()
+    } catch (_) {}
+
+    // Re-create the peer using the same initiator flag it had originally
+    createPeer(entry.socketId, entry.userId, entry.userName, entry.isInitiator, localStreamRef.current)
+  }, [createPeer])
 
   const removePeer = (socketId: string) => {
     const entry = peersRef.current.get(socketId)
@@ -149,6 +223,10 @@ export function useWebRTC(
     peersRef.current.clear()
     setPeers([])
 
+    // Clear all timeouts
+    timeoutsRef.current.forEach((timeout) => clearTimeout(timeout))
+    timeoutsRef.current.clear()
+
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((t) => t.stop())
       localStreamRef.current = null
@@ -160,10 +238,6 @@ export function useWebRTC(
   useEffect(() => {
     if (!socket || !roomId) return
 
-    /**
-     * room-participants — fired once when we join, lists existing peers.
-     * We (the new joiner) act as the initiator and create offers to all of them.
-     */
     const handleRoomParticipants = (participants: Array<{ socketId: string; userId: string; userName: string }>) => {
       participants.forEach(({ socketId, userId: uid, userName: uname }) => {
         if (!peersRef.current.has(socketId)) {
@@ -172,39 +246,30 @@ export function useWebRTC(
       })
     }
 
-    /**
-     * user-connected — a new peer joined AFTER us.
-     * They will send us an offer; we are NOT the initiator here.
-     * We just create a non-initiating peer to be ready to receive the offer.
-     */
     const handleUserConnected = ({ socketId, userId: uid, userName: uname }: { socketId: string; userId: string; userName: string }) => {
       if (!peersRef.current.has(socketId)) {
         createPeer(socketId, uid, uname, false, localStreamRef.current)
       }
     }
 
-    /**
-     * user-disconnected — clean up the peer whose socket closed.
-     */
     const handleUserDisconnected = ({ socketId }: { socketId: string }) => {
       removePeer(socketId)
     }
 
-    /**
-     * webrtc-offer — received from an initiating peer.
-     * Signal their offer data into our non-initiating peer instance.
-     */
     const handleOffer = ({ from, offer }: { from: string; offer: Peer.SignalData }) => {
       const existing = peersRef.current.get(from)
       if (existing) {
+        // Self-Healing reset: If initiator starts a new handshaking round, refresh client peer instance
+        if (existing.connectionState === 'failed' || !existing.isInitiator) {
+          try { existing.peer.destroy() } catch (_) {}
+          const newPeer = createPeer(existing.socketId, existing.userId, existing.userName, false, localStreamRef.current)
+          newPeer.signal(offer)
+          return
+        }
         existing.peer.signal(offer)
       }
     }
 
-    /**
-     * webrtc-answer — received from a non-initiating peer.
-     * Signal their answer into our initiating peer instance.
-     */
     const handleAnswer = ({ from, answer }: { from: string; answer: Peer.SignalData }) => {
       const existing = peersRef.current.get(from)
       if (existing) {
@@ -212,9 +277,6 @@ export function useWebRTC(
       }
     }
 
-    /**
-     * ice-candidate — trickle ICE candidates between peers.
-     */
     const handleIceCandidate = ({ from, candidate }: { from: string; candidate: Peer.SignalData }) => {
       const existing = peersRef.current.get(from)
       if (existing) {
@@ -241,5 +303,5 @@ export function useWebRTC(
     }
   }, [socket, roomId, createPeer])
 
-  return { localStream, peers, initLocalStream, destroyAll }
+  return { localStream, peers, initLocalStream, destroyAll, retryPeerConnection }
 }

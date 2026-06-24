@@ -7,6 +7,8 @@ import {
 } from 'lucide-react'
 import { useSocket } from '../hooks/useSocket'
 import { useWebRTC } from '../hooks/useWebRTC'
+import ConnectionStatusAlert from '../components/ConnectionStatusAlert'
+
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -110,7 +112,7 @@ export default function MeetingPage() {
 
   // ─── Hooks ────────────────────────────────────────────────────────────────
   const { socket, isConnected } = useSocket()
-  const { localStream, peers, initLocalStream, destroyAll } = useWebRTC(socket, roomId, userId, userName)
+  const { localStream, peers, initLocalStream, destroyAll, retryPeerConnection } = useWebRTC(socket, roomId, userId, userName)
 
   // ─── Local state ──────────────────────────────────────────────────────────
   const [micOn, setMicOn] = useState(true)
@@ -301,6 +303,10 @@ export default function MeetingPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D1117' }}>
+      
+      {/* Global Socket reconnect banner */}
+      {!isConnected && <ConnectionStatusAlert type="socket" />}
+
 
       {/* ── Top Bar ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#161B22' }}>
@@ -447,6 +453,14 @@ export default function MeetingPage() {
                         style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>
                         {peer.userName.split(' ')[0]}
                       </div>
+                    )}
+                    {/* Connection failure overlay */}
+                    {peer.connectionState === 'failed' && (
+                      <ConnectionStatusAlert 
+                        type="peer" 
+                        peerName={peer.userName} 
+                        onRetry={() => retryPeerConnection(peer.socketId)} 
+                      />
                     )}
                     {/* Online indicator */}
                     <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400" title="Online" />

@@ -1,24 +1,10 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-// Helper to generate access tokens
-const generateAccessToken = (user) => {
-  return jwt.sign(
-    { userId: user._id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: '15m' }
-  );
-};
-
-// Helper to generate refresh tokens
-const generateRefreshToken = (user) => {
-  return jwt.sign(
-    { userId: user._id },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' }
-  );
-};
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken
+} = require('../utils/jwtUtils');
 
 const register = async (req, res, next) => {
   try {
@@ -114,7 +100,7 @@ const refresh = async (req, res, next) => {
 
     let decoded;
     try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      decoded = verifyRefreshToken(refreshToken);
     } catch (err) {
       return res.status(403).json({ error: 'Invalid or expired refresh token. Please sign in again.' });
     }

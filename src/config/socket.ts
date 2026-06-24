@@ -16,8 +16,10 @@ export function getSocket(): Socket {
       transports: ['websocket', 'polling'],
       autoConnect: false,    // We connect manually when joining a room
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
+      reconnectionAttempts: Infinity, // Keep reconnecting indefinitely
+      reconnectionDelay: 1000,        // Start retry delay at 1s
+      reconnectionDelayMax: 5000,     // Grow up to a maximum of 5s
+      randomizationFactor: 0.5,       // Randomize backoff intervals to prevent thundering herds
     })
   }
   return socketInstance

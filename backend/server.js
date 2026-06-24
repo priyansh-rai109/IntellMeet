@@ -11,9 +11,12 @@ const authRoutes = require('./routes/auth');
 const meetingRoutes = require('./routes/meetings');
 const taskRoutes = require('./routes/tasks');
 const aiRoutes = require('./routes/ai');
+const webrtcRoutes = require('./routes/webrtc');
+
 
 // Import Socket.io handler
 const registerSocketHandlers = require('./socket/socketHandler');
+const socketAuthMiddleware = require('./middleware/socketAuthMiddleware');
 
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +50,9 @@ const io = new Server(server, {
   pingInterval: 25000,
 });
 
+// Use JWT authentication middleware for Socket.io
+io.use(socketAuthMiddleware);
+
 // Register all socket event handlers
 registerSocketHandlers(io);
 
@@ -69,6 +75,8 @@ app.use(express.json());
 // ─── Database ─────────────────────────────────────────────────────────────────
 const connectDB = async () => {
   try {
+    // Enable Mongoose sanitization filter to prevent NoSQL Injection
+    mongoose.set('sanitizeFilter', true);
     const conn = await mongoose.connect(process.env.MONGODB_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
@@ -94,6 +102,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/webrtc', webrtcRoutes);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {

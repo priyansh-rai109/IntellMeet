@@ -1,21 +1,41 @@
 const express = require('express')
+const { body, validationResult } = require('express-validator')
 const router = express.Router()
 const { generateSummary, extractActionItems } = require('../services/aiService')
 const Meeting = require('../models/Meeting')
 const auth = require('../middleware/authMiddleware')
+
+// Helper to handle validation errors
+const validate = (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array().map(err => ({ field: err.path, message: err.msg }))
+    })
+  }
+  next()
+}
+
+// Common validations for AI endpoints
+const aiValidators = [
+  body('transcript')
+    .trim()
+    .isLength({ min: 10 })
+    .withMessage('Transcript is too short or empty. Please provide at least 10 characters.'),
+  body('meetingId')
+    .optional()
+    .isMongoId()
+    .withMessage('meetingId must be a valid MongoDB ObjectId if provided.')
+]
 
 /**
  * POST /api/ai/summarize
  * Body: { transcript: string, meetingId?: string }
  * Returns: { summary: string }
  */
-router.post('/summarize', auth, async (req, res) => {
+router.post('/summarize', auth, aiValidators, validate, async (req, res) => {
   try {
     const { transcript, meetingId } = req.body
-
-    if (!transcript || transcript.trim().length < 10) {
-      return res.status(400).json({ error: 'Transcript is too short or empty. Please provide at least 10 characters.' })
-    }
 
     const summary = await generateSummary(transcript)
 
@@ -44,13 +64,9 @@ router.post('/summarize', auth, async (req, res) => {
  * Body: { transcript: string, meetingId?: string }
  * Returns: { actionItems: Array }
  */
-router.post('/action-items', auth, async (req, res) => {
+router.post('/action-items', auth, aiValidators, validate, async (req, res) => {
   try {
     const { transcript, meetingId } = req.body
-
-    if (!transcript || transcript.trim().length < 10) {
-      return res.status(400).json({ error: 'Transcript is too short or empty. Please provide at least 10 characters.' })
-    }
 
     const actionItems = await extractActionItems(transcript)
 
@@ -82,13 +98,9 @@ router.post('/action-items', auth, async (req, res) => {
  * Body: { transcript: string, meetingId?: string }
  * Returns: { summary: string, actionItems: Array }
  */
-router.post('/analyze', auth, async (req, res) => {
+router.post('/analyze', auth, aiValidators, validate, async (req, res) => {
   try {
     const { transcript, meetingId } = req.body
-
-    if (!transcript || transcript.trim().length < 10) {
-      return res.status(400).json({ error: 'Transcript is too short or empty. Please provide at least 10 characters.' })
-    }
 
     const [summary, actionItems] = await Promise.all([
       generateSummary(transcript),

@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+const { verifyAccessToken } = require('../utils/jwtUtils');
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -9,7 +9,7 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyAccessToken(token);
     req.user = decoded; // Attach user info (userId, role) to the request object
     next();
   } catch (error) {
