@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import api from '../config/api.js'
+import { toast } from 'react-hot-toast'
 import {
   User,
   Bell,
@@ -22,36 +23,7 @@ import {
   Lock,
   Trash2,
   CheckCircle,
-  ToggleLeft,
-  ToggleRight,
 } from 'lucide-react'
-
-// ─── Toast ────────────────────────────────────────────────────────────────
-
-function Toast({ message, type = 'success', onClose }: { message: string; type?: 'success' | 'error'; onClose: () => void }) {
-  useEffect(() => {
-    const t = setTimeout(onClose, 3200)
-    return () => clearTimeout(t)
-  }, [onClose])
-
-  return (
-    <div
-      className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl text-white"
-      style={{
-        background: type === 'success' ? 'linear-gradient(135deg, #059669, #10B981)' : 'linear-gradient(135deg, #DC2626, #EF4444)',
-        minWidth: '300px',
-        animation: 'slide-in-right 0.3s ease-out',
-        border: type === 'success' ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)',
-      }}
-    >
-      {type === 'success' ? <CheckCircle size={18} className="flex-shrink-0" /> : <X size={18} className="flex-shrink-0" />}
-      <span className="font-semibold text-sm flex-1">{message}</span>
-      <button onClick={onClose} className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
-        <X size={14} />
-      </button>
-    </div>
-  )
-}
 
 // ─── Toggle Switch ────────────────────────────────────────────────────────
 
@@ -59,18 +31,17 @@ function Toggle({ enabled, onChange, id }: { enabled: boolean; onChange: (v: boo
   return (
     <button
       id={id}
+      type="button"
       onClick={() => onChange(!enabled)}
-      className="relative flex-shrink-0 cursor-pointer transition-all duration-300 rounded-full"
-      style={{
-        width: '44px',
-        height: '24px',
-        background: enabled ? 'linear-gradient(135deg, #7C3AED, #5B21B6)' : '#E2E8F0',
-        boxShadow: enabled ? '0 0 0 2px rgba(124,58,237,0.2)' : 'none',
-      }}
+      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+        enabled ? 'bg-blue-600' : 'bg-white/10'
+      }`}
     >
-      <div
-        className="absolute top-0.5 rounded-full bg-white shadow-sm transition-all duration-300"
-        style={{ width: '20px', height: '20px', left: enabled ? '22px' : '2px' }}
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+          enabled ? 'translate-x-5' : 'translate-x-0'
+        }`}
       />
     </button>
   )
@@ -80,12 +51,12 @@ function Toggle({ enabled, onChange, id }: { enabled: boolean; onChange: (v: boo
 
 function Section({ id, title, icon: Icon, children }: { id: string; title: string; icon: any; children: React.ReactNode }) {
   return (
-    <div id={id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden scroll-mt-24">
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.08)' }}>
-          <Icon size={16} style={{ color: '#7C3AED' }} />
+    <div id={id} className="bg-white/[0.04] border border-white/8 backdrop-blur-md rounded-2xl overflow-hidden scroll-mt-24">
+      <div className="px-6 py-4 border-b border-white/5 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-600/10 border border-blue-500/20">
+          <Icon size={16} className="text-blue-400" />
         </div>
-        <h2 className="font-bold text-slate-800 text-base">{title}</h2>
+        <h2 className="font-bold text-white text-base">{title}</h2>
       </div>
       <div className="p-6">{children}</div>
     </div>
@@ -103,7 +74,7 @@ function Input({ label, id, type = 'text', value, onChange, readOnly = false, pl
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-semibold text-slate-700 mb-1.5">{label}</label>
+      <label htmlFor={id} className="block text-gray-300 text-sm font-medium mb-1">{label}</label>
       <div className="relative">
         <input
           id={id}
@@ -112,17 +83,17 @@ function Input({ label, id, type = 'text', value, onChange, readOnly = false, pl
           onChange={e => onChange?.(e.target.value)}
           readOnly={readOnly}
           placeholder={placeholder}
-          className={`w-full px-4 py-2.5 rounded-xl border text-sm text-slate-800 outline-none transition-all duration-200 ${
+          className={`w-full px-4 py-3 rounded-xl border text-sm text-white placeholder-gray-600 outline-none transition-all duration-200 ${
             readOnly
-              ? 'bg-slate-50 border-slate-200 text-slate-500 cursor-not-allowed'
-              : 'bg-white border-slate-200 focus:ring-2 focus:ring-purple-100 focus:border-purple-400'
+              ? 'bg-white/[0.02] border-white/5 text-gray-500 cursor-not-allowed opacity-50'
+              : 'bg-white/5 border-white/10 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'
           } ${isPassword ? 'pr-11' : ''}`}
         />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShowPw(s => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer"
           >
             {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
@@ -137,37 +108,36 @@ function Input({ label, id, type = 'text', value, onChange, readOnly = false, pl
 function DeleteModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
   const [typed, setTyped] = useState('')
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-red-100" style={{ animation: 'scale-in 0.2s ease-out' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+      <div className="bg-[#0d1420] border border-red-500/20 rounded-2xl shadow-2xl w-full max-w-md p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-            <AlertTriangle size={20} style={{ color: '#EF4444' }} />
+          <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle size={20} className="text-red-400" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Delete Account</h3>
+            <h3 className="font-bold text-white text-base">Delete Account</h3>
             <p className="text-xs text-slate-500">This action cannot be undone.</p>
           </div>
         </div>
-        <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-          All your meetings, tasks, and data will be <strong>permanently deleted</strong>. Please type <strong>DELETE</strong> to confirm.
+        <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+          All your meetings, tasks, and data will be <strong className="text-slate-200 font-semibold">permanently deleted</strong>. Please type <strong className="text-slate-200 font-semibold">DELETE</strong> to confirm.
         </p>
         <input
           type="text"
           value={typed}
           onChange={e => setTyped(e.target.value)}
           placeholder="Type DELETE to confirm"
-          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 mb-4"
+          className="w-full px-4 py-3 rounded-xl border border-white/10 text-sm text-white placeholder-gray-600 outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 bg-white/5 mb-4"
         />
         <div className="flex gap-3">
           <button onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">
+            className="flex-1 py-2.5 rounded-xl text-xs font-bold border border-white/10 text-slate-400 hover:bg-white/5 transition-colors cursor-pointer">
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={typed !== 'DELETE'}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: 'linear-gradient(135deg, #DC2626, #EF4444)' }}
+            className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-red-600 hover:bg-red-500"
           >
             Delete Account
           </button>
@@ -214,7 +184,7 @@ export default function SettingsPage() {
   })
 
   // ── Appearance state ───────────────────────────
-  const [theme, setTheme]         = useState<'light' | 'dark' | 'system'>('light')
+  const [theme, setTheme]         = useState<'light' | 'dark' | 'system'>('dark')
   const [sidebarCollapse, setSidebarCollapse] = useState(false)
 
   // ── Security state ─────────────────────────────
@@ -229,10 +199,6 @@ export default function SettingsPage() {
 
   // ── Active section ─────────────────────────────
   const [activeSection, setActiveSection] = useState('section-profile')
-
-  // ── Toast ──────────────────────────────────────
-  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
-  const showToast = (msg: string, type: 'success' | 'error' = 'success') => setToast({ msg, type })
 
   // Track active section on scroll
   useEffect(() => {
@@ -265,10 +231,9 @@ export default function SettingsPage() {
   }
 
   async function handleSaveProfile() {
-    if (!name.trim()) { showToast('Name cannot be empty.', 'error'); return }
+    if (!name.trim()) { toast.error('Name cannot be empty.'); return }
     setProfileLoading(true)
     try {
-      // Try real API first, fall back to localStorage
       await api.put('/auth/profile', { name: name.trim(), role })
     } catch {
       // Route might not exist yet — save locally
@@ -278,29 +243,29 @@ export default function SettingsPage() {
       const initials = name.trim().split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
       localStorage.setItem('initials', initials)
       setProfileLoading(false)
-      showToast('Profile saved successfully!')
+      toast.success('Profile saved successfully!')
     }
   }
 
   function handleSaveNotifications() {
-    showToast('Notification preferences saved!')
+    toast.success('Notification preferences saved!')
   }
 
   function handleSaveAppearance() {
-    showToast('Appearance settings saved!')
+    toast.success('Appearance settings saved!')
   }
 
   async function handleChangePassword() {
-    if (!currentPw) { showToast('Enter your current password.', 'error'); return }
-    if (newPw.length < 8) { showToast('New password must be at least 8 characters.', 'error'); return }
-    if (newPw !== confirmPw) { showToast('Passwords do not match.', 'error'); return }
+    if (!currentPw) { toast.error('Enter your current password.'); return }
+    if (newPw.length < 8) { toast.error('New password must be at least 8 characters.'); return }
+    if (newPw !== confirmPw) { toast.error('Passwords do not match.'); return }
     setPwLoading(true)
     try {
       await api.put('/auth/change-password', { currentPassword: currentPw, newPassword: newPw })
-      showToast('Password updated successfully!')
+      toast.success('Password updated successfully!')
       setCurrentPw(''); setNewPw(''); setConfirmPw('')
     } catch (err: any) {
-      showToast(err?.response?.data?.message || 'Failed to update password.', 'error')
+      toast.error(err?.response?.data?.message || 'Failed to update password.')
     } finally {
       setPwLoading(false)
     }
@@ -314,19 +279,29 @@ export default function SettingsPage() {
   const initials = (name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'U'
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#F8FAFC' }}>
+    <div className="flex min-h-screen" style={{ background: '#0a0f1a' }}>
       <Sidebar />
 
-      {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      {/* Modal wrapper */}
       {showDeleteModal && <DeleteModal onConfirm={handleDeleteAccount} onCancel={() => setShowDeleteModal(false)} />}
 
       <main className="flex-1 ml-64 min-h-screen">
+        {/* Style block for glow */}
+        <style>{`
+          .glow-btn-blue {
+            transition: all 0.3s ease;
+          }
+          .glow-btn-blue:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.45);
+          }
+        `}</style>
+
         {/* Header */}
-        <div className="sticky top-0 z-30 px-8 py-4 flex items-center justify-between border-b border-slate-200/80"
-          style={{ background: 'rgba(248,250,252,0.9)', backdropFilter: 'blur(12px)' }}>
+        <div className="sticky top-0 z-30 px-8 py-5 flex items-center justify-between border-b"
+          style={{ background: 'rgba(10, 15, 26, 0.85)', backdropFilter: 'blur(16px)', borderColor: 'rgba(255, 255, 255, 0.06)' }}>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">Settings</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Manage your account preferences</p>
+            <h1 className="text-xl font-bold text-white">Settings</h1>
+            <p className="text-sm text-slate-400 mt-0.5">Manage your account preferences</p>
           </div>
         </div>
 
@@ -334,8 +309,8 @@ export default function SettingsPage() {
 
           {/* ── Left sticky nav ── */}
           <div className="w-52 flex-shrink-0">
-            <div className="sticky top-24 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-              <div className="px-3 py-3 space-y-0.5">
+            <div className="sticky top-24 bg-white/[0.04] border border-white/8 backdrop-blur-md rounded-2xl overflow-hidden">
+              <div className="px-3 py-3 space-y-1">
                 {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
                   const active = activeSection === id
                   return (
@@ -343,14 +318,15 @@ export default function SettingsPage() {
                       key={id}
                       id={`nav-${id}`}
                       onClick={() => scrollToSection(id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 cursor-pointer text-sm font-medium ${
-                        active ? 'text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-all duration-150 cursor-pointer text-xs font-semibold ${
+                        active 
+                          ? 'bg-blue-600/15 text-white border-l-2 border-blue-500 rounded-xl font-medium' 
+                          : 'text-gray-400 hover:text-white hover:bg-white/5 rounded-xl'
                       }`}
-                      style={active ? { background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' } : {}}
                     >
-                      <Icon size={15} className={active ? 'text-white' : 'text-slate-400'} />
+                      <Icon size={15} className={active ? 'text-blue-400' : 'text-gray-400'} />
                       {label}
-                      {active && <ChevronRight size={13} className="ml-auto text-purple-200" />}
+                      {active && <ChevronRight size={13} className="ml-auto text-blue-400 animate-pulse" />}
                     </button>
                   )
                 })}
@@ -359,7 +335,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── Right content ── */}
-          <div className="flex-1 space-y-6 page-enter">
+          <div className="flex-1 space-y-6">
 
             {/* ══ 1. PROFILE ══ */}
             <Section id="section-profile" title="Profile Settings" icon={User}>
@@ -368,8 +344,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-5">
                   <div className="relative">
                     <div
-                      className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg overflow-hidden"
-                      style={{ background: avatarPreview ? undefined : 'linear-gradient(135deg, #7C3AED, #06B6D4)' }}
+                      className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black text-blue-300 shadow-lg overflow-hidden bg-blue-600/30 border border-blue-500/20"
                     >
                       {avatarPreview
                         ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
@@ -378,20 +353,18 @@ export default function SettingsPage() {
                     </div>
                     <button
                       onClick={() => avatarRef.current?.click()}
-                      className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center text-white shadow-md cursor-pointer transition-transform hover:scale-110"
-                      style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+                      className="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center text-white shadow-md cursor-pointer transition-transform hover:scale-110 bg-blue-600 hover:bg-blue-500"
                     >
                       <Camera size={13} />
                     </button>
                     <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800 text-sm">{name || 'Your Name'}</p>
+                    <p className="font-semibold text-white text-sm">{name || 'Your Name'}</p>
                     <p className="text-xs text-slate-500 mt-0.5">{email}</p>
                     <button
                       onClick={() => avatarRef.current?.click()}
-                      className="mt-2 text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity"
-                      style={{ color: '#7C3AED' }}
+                      className="mt-2 text-xs font-semibold cursor-pointer text-blue-400 hover:text-blue-300 transition-colors"
                     >
                       Change Photo
                     </button>
@@ -403,25 +376,24 @@ export default function SettingsPage() {
                   <Input id="profile-email" label="Email Address" value={email} readOnly />
                 </div>
 
-                <div>
-                  <label htmlFor="profile-role" className="block text-sm font-semibold text-slate-700 mb-1.5">Role</label>
+                <div className="space-y-1.5">
+                  <label htmlFor="profile-role" className="block text-gray-300 text-sm font-medium mb-1">Role</label>
                   <select
                     id="profile-role"
                     value={role}
                     onChange={e => setRole(e.target.value)}
-                    className="w-full sm:w-64 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white outline-none focus:ring-2 focus:ring-purple-100 focus:border-purple-400 cursor-pointer"
+                    className="w-full sm:w-64 px-4 py-3 rounded-xl border border-white/10 text-sm text-white bg-[#0d1420] outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
                   >
-                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                    {ROLES.map(r => <option key={r} value={r} className="bg-slate-900 text-white">{r}</option>)}
                   </select>
                 </div>
 
-                <div className="pt-1">
+                <div className="pt-2">
                   <button
                     id="save-profile-btn"
                     onClick={handleSaveProfile}
                     disabled={profileLoading}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed shadow-md cursor-pointer"
-                    style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+                    className="glow-btn-blue flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-xs font-bold transition-all disabled:opacity-60 shadow-md cursor-pointer bg-blue-600 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
                   >
                     {profileLoading
                       ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving…</>
@@ -434,7 +406,7 @@ export default function SettingsPage() {
 
             {/* ══ 2. NOTIFICATIONS ══ */}
             <Section id="section-notifications" title="Notification Preferences" icon={Bell}>
-              <div className="space-y-0 divide-y divide-slate-50">
+              <div className="space-y-0 divide-y divide-white/5">
                 {([
                   { key: 'newMeetings',   label: 'New meeting invitations',    desc: 'Get notified when someone schedules a meeting with you' },
                   { key: 'actionItems',   label: 'Action item reminders',       desc: 'Daily reminders for your pending action items' },
@@ -443,8 +415,8 @@ export default function SettingsPage() {
                 ] as const).map(({ key, label, desc }) => (
                   <div key={key} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
                     <div className="flex-1 min-w-0 pr-4">
-                      <p className="text-sm font-semibold text-slate-800">{label}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                      <p className="text-sm font-semibold text-white">{label}</p>
+                      <p className="text-sm text-gray-500 mt-1">{desc}</p>
                     </div>
                     <Toggle
                       id={`toggle-${key}`}
@@ -454,12 +426,11 @@ export default function SettingsPage() {
                   </div>
                 ))}
               </div>
-              <div className="pt-5 border-t border-slate-100 mt-2">
+              <div className="pt-5 border-t border-white/5 mt-4">
                 <button
                   id="save-notifications-btn"
                   onClick={handleSaveNotifications}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] shadow-md cursor-pointer"
-                  style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+                  className="glow-btn-blue flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-xs font-bold transition-all shadow-md cursor-pointer bg-blue-600 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
                 >
                   <Check size={15} />Save Preferences
                 </button>
@@ -471,7 +442,7 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 {/* Theme selector */}
                 <div>
-                  <p className="text-sm font-semibold text-slate-700 mb-3">Theme</p>
+                  <p className="text-sm font-semibold text-slate-300 mb-3">Theme</p>
                   <div className="grid grid-cols-3 gap-3 max-w-sm">
                     {([
                       { value: 'light',  label: 'Light',  icon: Sun },
@@ -483,16 +454,18 @@ export default function SettingsPage() {
                         <button
                           key={value}
                           id={`theme-${value}`}
+                          type="button"
                           onClick={() => setTheme(value)}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer ${
-                            active ? 'border-purple-400 text-purple-700' : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                            active 
+                              ? 'border-blue-500 bg-blue-500/10 text-white font-medium' 
+                              : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
                           }`}
-                          style={active ? { background: 'rgba(124,58,237,0.06)' } : { background: '#FAFAFA' }}
                         >
-                          <Icon size={20} style={active ? { color: '#7C3AED' } : {}} />
+                          <Icon size={20} className={active ? 'text-blue-400' : 'text-gray-400'} />
                           <span className="text-xs font-semibold">{label}</span>
                           {active && (
-                            <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: '#7C3AED' }}>
+                            <div className="w-4 h-4 rounded-full flex items-center justify-center bg-blue-600">
                               <Check size={10} className="text-white" />
                             </div>
                           )}
@@ -503,10 +476,10 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Sidebar collapse pref */}
-                <div className="flex items-center justify-between py-4 border-t border-slate-100">
+                <div className="flex items-center justify-between py-4 border-t border-white/5">
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">Auto-collapse sidebar</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Automatically collapse the sidebar on smaller screens</p>
+                    <p className="text-sm font-semibold text-white">Auto-collapse sidebar</p>
+                    <p className="text-sm text-gray-500 mt-1">Automatically collapse the sidebar on smaller screens</p>
                   </div>
                   <Toggle id="toggle-sidebar-collapse" enabled={sidebarCollapse} onChange={setSidebarCollapse} />
                 </div>
@@ -514,8 +487,7 @@ export default function SettingsPage() {
                 <button
                   id="save-appearance-btn"
                   onClick={handleSaveAppearance}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] shadow-md cursor-pointer"
-                  style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+                  className="glow-btn-blue flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-xs font-bold transition-all shadow-md cursor-pointer bg-blue-600 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
                 >
                   <Check size={15} />Save Appearance
                 </button>
@@ -528,8 +500,8 @@ export default function SettingsPage() {
                 {/* Change password */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
-                    <Lock size={14} style={{ color: '#7C3AED' }} />
-                    <h3 className="text-sm font-bold text-slate-800">Change Password</h3>
+                    <Lock size={14} className="text-blue-400" />
+                    <h3 className="text-sm font-bold text-white">Change Password</h3>
                   </div>
                   <div className="space-y-3 max-w-sm">
                     <Input id="current-password" label="Current Password" type="password" value={currentPw} onChange={setCurrentPw} placeholder="Enter current password" />
@@ -541,9 +513,9 @@ export default function SettingsPage() {
                   {newPw.length > 0 && (
                     <div className="mt-3 max-w-sm">
                       <div className="flex gap-1 mb-1">
-                        {[1,2,3,4].map(n => (
+                        {[1, 2, 3, 4].map(n => (
                           <div key={n} className="flex-1 h-1 rounded-full transition-colors"
-                            style={{ background: newPw.length >= n * 2 ? (newPw.length >= 8 ? '#10B981' : '#F59E0B') : '#E2E8F0' }} />
+                            style={{ background: newPw.length >= n * 2 ? (newPw.length >= 8 ? '#10B981' : '#F59E0B') : 'rgba(255,255,255,0.1)' }} />
                         ))}
                       </div>
                       <p className="text-xs" style={{ color: newPw.length >= 8 ? '#10B981' : '#F59E0B' }}>
@@ -556,8 +528,7 @@ export default function SettingsPage() {
                     id="update-password-btn"
                     onClick={handleChangePassword}
                     disabled={pwLoading}
-                    className="mt-4 flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-90 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed shadow-md cursor-pointer"
-                    style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
+                    className="glow-btn-blue mt-4 flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-xs font-bold transition-all disabled:opacity-60 shadow-md cursor-pointer bg-blue-600 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
                   >
                     {pwLoading
                       ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Updating…</>
@@ -567,24 +538,23 @@ export default function SettingsPage() {
                 </div>
 
                 {/* 2FA */}
-                <div className="pt-5 border-t border-slate-100">
+                <div className="pt-5 border-t border-white/5">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <p className="text-sm font-bold text-slate-800">Two-Factor Authentication</p>
-                        <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(245,158,11,0.1)', color: '#D97706' }}>
+                        <p className="text-sm font-bold text-white">Two-Factor Authentication</p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-green-500/20 text-green-400">
                           Recommended
                         </span>
                       </div>
                       <p className="text-xs text-slate-500">Add an extra layer of security to your account with 2FA via authenticator app.</p>
                     </div>
-                    <Toggle id="toggle-2fa" enabled={twoFA} onChange={v => { setTwoFA(v); showToast(v ? '2FA enabled (UI demo)' : '2FA disabled (UI demo)') }} />
+                    <Toggle id="toggle-2fa" enabled={twoFA} onChange={v => { setTwoFA(v); toast.success(v ? '2FA enabled (UI demo)' : '2FA disabled (UI demo)') }} />
                   </div>
                   {twoFA && (
-                    <div className="mt-3 p-3 rounded-xl border border-emerald-200 flex items-center gap-2"
-                      style={{ background: 'rgba(16,185,129,0.06)' }}>
-                      <CheckCircle size={14} style={{ color: '#10B981' }} />
-                      <span className="text-xs text-emerald-700 font-semibold">Two-factor authentication is active.</span>
+                    <div className="mt-3 p-3.5 rounded-xl border border-green-500/20 flex items-center gap-2 bg-green-500/5">
+                      <CheckCircle className="text-green-400" size={14} />
+                      <span className="text-xs text-green-400 font-semibold">Two-factor authentication is active.</span>
                     </div>
                   )}
                 </div>
@@ -597,24 +567,24 @@ export default function SettingsPage() {
                 {/* Connected devices */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Laptop size={14} style={{ color: '#7C3AED' }} />
-                    <h3 className="text-sm font-bold text-slate-800">Connected Sessions</h3>
+                    <Laptop size={14} className="text-blue-400" />
+                    <h3 className="text-sm font-bold text-white">Connected Sessions</h3>
                   </div>
                   <div className="space-y-2">
                     {[
                       { device: 'MacBook Pro — Chrome', location: 'Mumbai, India', time: 'Active now', icon: Laptop, current: true },
                       { device: 'iPhone 15 — Safari', location: 'Mumbai, India', time: '2 hours ago', icon: Smartphone, current: false },
                     ].map(({ device, location, time, icon: Icon, current }) => (
-                      <div key={device} className="flex items-center gap-4 p-3.5 rounded-xl border border-slate-100 bg-slate-50/50">
+                      <div key={device} className="flex items-center gap-4 p-3.5 rounded-xl border border-white/5 bg-white/[0.01]">
                         <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ background: current ? 'rgba(124,58,237,0.1)' : 'rgba(100,116,139,0.1)' }}>
-                          <Icon size={16} style={{ color: current ? '#7C3AED' : '#64748B' }} />
+                          style={{ background: current ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)' }}>
+                          <Icon size={16} className={current ? 'text-blue-400' : 'text-slate-500'} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold text-slate-800">{device}</p>
+                            <p className="text-sm font-semibold text-white">{device}</p>
                             {current && (
-                              <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'rgba(16,185,129,0.1)', color: '#059669' }}>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-blue-500/20 text-blue-400">
                                 This device
                               </span>
                             )}
@@ -622,7 +592,7 @@ export default function SettingsPage() {
                           <p className="text-xs text-slate-500 mt-0.5">{location} · {time}</p>
                         </div>
                         {!current && (
-                          <button className="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors cursor-pointer">
+                          <button className="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors cursor-pointer">
                             Revoke
                           </button>
                         )}
@@ -632,16 +602,15 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Danger zone */}
-                <div className="rounded-2xl border-2 border-red-200 overflow-hidden"
-                  style={{ background: 'rgba(254,242,242,0.5)' }}>
-                  <div className="px-5 py-3 border-b border-red-100 flex items-center gap-2">
-                    <AlertTriangle size={14} style={{ color: '#EF4444' }} />
-                    <h3 className="text-sm font-bold" style={{ color: '#DC2626' }}>Danger Zone</h3>
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/5 overflow-hidden">
+                  <div className="px-5 py-3.5 border-b border-red-500/10 flex items-center gap-2 bg-red-500/[0.02]">
+                    <AlertTriangle size={14} className="text-red-400" />
+                    <h3 className="text-sm font-bold text-red-400">Danger Zone</h3>
                   </div>
                   <div className="px-5 py-5">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">Delete Account</p>
+                        <p className="text-sm font-semibold text-white">Delete Account</p>
                         <p className="text-xs text-slate-500 mt-0.5">
                           Permanently delete your account and all associated data. This cannot be undone.
                         </p>
@@ -649,8 +618,7 @@ export default function SettingsPage() {
                       <button
                         id="delete-account-btn"
                         onClick={() => setShowDeleteModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02] flex-shrink-0 ml-4 cursor-pointer"
-                        style={{ background: 'linear-gradient(135deg, #DC2626, #EF4444)' }}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all flex-shrink-0 cursor-pointer bg-red-600 hover:bg-red-500"
                       >
                         <Trash2 size={14} />
                         Delete Account
