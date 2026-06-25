@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   Mic, MicOff, Video, VideoOff, Monitor, Hand, Circle,
   PhoneOff, Bot, Send, Users, Wifi, WifiOff, MoreVertical,
-  MessageSquare, UserCircle2,
+  MessageSquare, UserCircle2, Link,
 } from 'lucide-react'
 import { useSocket } from '../hooks/useSocket'
 import { useWebRTC } from '../hooks/useWebRTC'
@@ -76,13 +76,12 @@ function RemoteVideo({ stream, userName, color }: { stream: MediaStream; userNam
 }
 
 /** Local video tile — always muted to avoid echo */
-function LocalVideo({ stream }: { stream: MediaStream }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+function LocalVideo({ stream, videoRef }: { stream: MediaStream; videoRef: React.RefObject<HTMLVideoElement | null> }) {
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream
     }
-  }, [stream])
+  }, [stream, videoRef])
   return (
     <video
       ref={videoRef}
@@ -126,10 +125,97 @@ export default function MeetingPage() {
   const [typingUsers, setTypingUsers] = useState<Record<string, string>>({}) // socketId → userName
   const [hasJoined, setHasJoined] = useState(false)
   const [streamError, setStreamError] = useState(false)
+  const [showInviteToast, setShowInviteToast] = useState(false)
 
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const localVideoRef = useRef<HTMLVideoElement | null>(null)
+  const screenTrackRef = useRef<MediaStreamTrack | null>(null)
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const timer = useTimer()
+
+  const handleInviteCopy = useCallback(() => {
+    navigator.clipboard.writeText(`${window.location.origin}/meeting/${roomId}`)
+      .then(() => {
+        setShowInviteToast(true)
+        setTimeout(() => setShowInviteToast(false), 3000)
+      })
+      .catch((err) => {
+        console.error('Failed to copy text: ', err)
+      })
+  }, [roomId])
+
+  const handleShareScreen = async () => {
+    try {
+      if (sharing) {
+        // Stop sharing - revert to camera
+        const tracks = localStream?.getTracks()
+        tracks?.forEach(track => {
+          if (track.kind === 'video') track.stop()
+        })
+        const newStream = await initLocalStream()
+        const cameraTrack = newStream?.getVideoTracks()[0]
+        const screenTrack = screenTrackRef.current
+        
+        if (cameraTrack && screenTrack && newStream) {
+          peers.forEach(p => {
+            try {
+              p.peer.replaceTrack(screenTrack, cameraTrack, newStream)
+            } catch (e) {
+              console.error('Error restoring camera track for peer:', p.userName, e)
+            }
+          })
+        }
+        
+        screenTrackRef.current = null
+        setSharing(false)
+      } else {
+        // Start screen share
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: false
+        })
+        const screenTrack = screenStream.getVideoTracks()[0]
+        screenTrackRef.current = screenTrack
+        
+        // Replace video track in all peer connections
+        const oldTrack = localStream?.getVideoTracks()[0]
+        if (oldTrack && screenTrack) {
+          peers.forEach(p => {
+            try {
+              p.peer.replaceTrack(oldTrack, screenTrack, localStream!)
+            } catch (e) {
+              console.error('Error replacing track for peer:', p.userName, e)
+            }
+          })
+        }
+
+        if (localVideoRef?.current) {
+          localVideoRef.current.srcObject = screenStream
+        }
+        
+        screenTrack.onended = async () => {
+          setSharing(false)
+          const newStream = await initLocalStream()
+          const cameraTrack = newStream?.getVideoTracks()[0]
+          if (cameraTrack && newStream) {
+            peers.forEach(p => {
+              try {
+                p.peer.replaceTrack(screenTrack, cameraTrack, newStream)
+              } catch (e) {
+                console.error('Error restoring camera track for peer:', p.userName, e)
+              }
+            })
+          }
+          screenTrackRef.current = null
+        }
+        
+        setSharing(true)
+      }
+    } catch (err) {
+      console.error('Screen share error:', err)
+      setSharing(false)
+    }
+  }
 
   // ─── Scroll chat ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -304,6 +390,14 @@ export default function MeetingPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0D1117' }}>
       
+      {/* Toast Notification */}
+      {showInviteToast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white shadow-2xl border border-white/10 bg-[#161B22] transition-all duration-300">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          Meeting link copied to clipboard!
+        </div>
+      )}
+
       {/* Global Socket reconnect banner */}
       {!isConnected && <ConnectionStatusAlert type="socket" />}
 
@@ -322,7 +416,18 @@ export default function MeetingPage() {
             <span className="text-white font-bold text-sm cursor-pointer hover:opacity-85" onClick={() => navigate('/dashboard')}>IntellMeet</span>
           </div>
           <div className="h-4 w-px bg-white/10" />
-          <span className="text-white font-semibold text-sm truncate max-w-48">Room · {roomId}</span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-white font-semibold text-sm truncate max-w-48">
+              Room · {roomId.length > 8 ? `${roomId.substring(0, 8)}...` : roomId}
+            </span>
+            <button
+              onClick={handleInviteCopy}
+              className="bg-white/10 hover:bg-white/15 text-white text-xs rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Link size={12} />
+              Invite
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -374,7 +479,7 @@ export default function MeetingPage() {
             style={{ border: '2px solid rgba(124,58,237,0.4)', background: '#0a0d12' }}
           >
             {localStream && camOn ? (
-              <LocalVideo stream={localStream} />
+              <LocalVideo stream={localStream} videoRef={localVideoRef} />
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <div
@@ -632,7 +737,7 @@ export default function MeetingPage() {
           },
           {
             id: 'btn-share', icon: Monitor, label: sharing ? 'Stop Share' : 'Share Screen',
-            active: sharing, onClick: () => setSharing(v => !v),
+            active: sharing, onClick: handleShareScreen,
             activeColor: 'rgba(6,182,212,0.2)', inactiveColor: 'rgba(255,255,255,0.1)',
             activeIcon: sharing ? 'text-cyan-400' : 'text-white',
           },

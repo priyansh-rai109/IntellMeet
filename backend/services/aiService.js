@@ -13,16 +13,53 @@ function getClient() {
   return _openai
 }
 
+const withRetry = async (fn, maxRetries = 3) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn()
+    } catch (err) {
+      if (err?.status === 429 && i < maxRetries - 1) {
+        const waitTime = Math.pow(2, i) * 1000 // 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+        continue
+      }
+      throw err
+    }
+  }
+}
+
+async function callChatCompletion(params) {
+  const openai = getClient()
+  try {
+    // Try gpt-4 first with retry
+    return await withRetry(() => 
+      openai.chat.completions.create({
+        ...params,
+        model: 'gpt-4'
+      })
+    )
+  } catch (err) {
+    if (err?.status === 429) {
+      console.warn('[AI] gpt-4 rate limited, falling back to gpt-3.5-turbo')
+      // Fallback to gpt-3.5-turbo with retry
+      return await withRetry(() => 
+        openai.chat.completions.create({
+          ...params,
+          model: 'gpt-3.5-turbo'
+        })
+      )
+    }
+    throw err
+  }
+}
+
 /**
  * Generates a concise bullet-point summary from a meeting transcript.
  * @param {string} transcript
  * @returns {Promise<string>}
  */
 async function generateSummary(transcript) {
-  const openai = getClient()
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+  const response = await callChatCompletion({
     messages: [
       {
         role: 'system',
@@ -48,10 +85,7 @@ async function generateSummary(transcript) {
  * @returns {Promise<Array>}
  */
 async function extractActionItems(transcript) {
-  const openai = getClient()
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+  const response = await callChatCompletion({
     messages: [
       {
         role: 'system',

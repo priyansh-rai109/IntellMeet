@@ -367,18 +367,55 @@ export default function PostMeetingPage() {
     setCheckedItems(prev => ({ ...prev, [i]: !prev[i] }))
   }
 
+  const handleExportPDF = () => {
+    window.print()
+  }
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/meeting/${currentId}`
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'IntellMeet Meeting Summary',
+          text: 'Check out this meeting summary',
+          url: shareUrl,
+        })
+      } catch (err) {
+        console.error('Error sharing:', err)
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl)
+        alert('Link copied to clipboard!')
+      } catch (err) {
+        console.error('Failed to copy link:', err)
+      }
+    }
+  }
+
   return (
     <div className="flex min-h-screen" style={{ background: '#0a0f1a' }}>
-      <Sidebar />
+      <div className="no-print">
+        <Sidebar />
+      </div>
 
       <main className="flex-1 ml-64 min-h-screen">
-        {/* Style block for glow */}
+        {/* Style block for glow and print */}
         <style>{`
           .glow-btn-blue {
             transition: all 0.3s ease;
           }
           .glow-btn-blue:hover:not(:disabled) {
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.45);
+          }
+          @media print {
+            .no-print {
+              display: none !important;
+            }
+            main {
+              margin-left: 0 !important;
+              padding: 0 !important;
+            }
           }
         `}</style>
 
@@ -399,17 +436,19 @@ export default function PostMeetingPage() {
               <span>Meeting Complete</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 no-print">
             <button
               id="export-pdf-btn"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white cursor-pointer"
+              onClick={handleExportPDF}
+              className="no-print flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white cursor-pointer"
             >
               <Download size={14} />
               Export PDF
             </button>
             <button
               id="share-btn"
-              className="glow-btn-blue flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all cursor-pointer bg-blue-600 hover:bg-blue-500"
+              onClick={handleShare}
+              className="no-print glow-btn-blue flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all cursor-pointer bg-blue-600 hover:bg-blue-500"
             >
               <Share2 size={14} />
               Share
@@ -537,7 +576,7 @@ export default function PostMeetingPage() {
           </div>
 
           {/* Bottom CTA */}
-          <div className="flex justify-center pb-6">
+          <div className="flex justify-center pb-6 no-print">
             <button
               onClick={() => navigate('/dashboard')}
               className="glow-btn-blue flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all cursor-pointer bg-blue-600 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"

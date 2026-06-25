@@ -51,8 +51,10 @@ router.post('/summarize', auth, aiValidators, validate, async (req, res) => {
     if (error.message.includes('OPENAI_API_KEY')) {
       return res.status(503).json({ error: 'OpenAI API key not configured on this server.' })
     }
-    if (error.status === 429) {
-      return res.status(429).json({ error: 'OpenAI rate limit reached. Please try again in a moment.' })
+    if (error.status === 429 || error?.status === 429) {
+      return res.status(429).json({ 
+        error: 'AI service is busy. Please wait a moment and try again.' 
+      })
     }
 
     res.status(500).json({ error: 'Failed to generate summary: ' + error.message })
@@ -84,8 +86,10 @@ router.post('/action-items', auth, aiValidators, validate, async (req, res) => {
     if (error instanceof SyntaxError) {
       return res.status(500).json({ error: 'AI returned an unexpected format. Please try again.' })
     }
-    if (error.status === 429) {
-      return res.status(429).json({ error: 'OpenAI rate limit reached. Please try again in a moment.' })
+    if (error.status === 429 || error?.status === 429) {
+      return res.status(429).json({ 
+        error: 'AI service is busy. Please wait a moment and try again.' 
+      })
     }
 
     res.status(500).json({ error: 'Failed to extract action items: ' + error.message })
@@ -121,8 +125,10 @@ router.post('/analyze', auth, aiValidators, validate, async (req, res) => {
     if (error instanceof SyntaxError) {
       return res.status(500).json({ error: 'AI returned an unexpected format. Please try again.' })
     }
-    if (error.status === 429) {
-      return res.status(429).json({ error: 'OpenAI rate limit reached. Please try again in a moment.' })
+    if (error.status === 429 || error?.status === 429) {
+      return res.status(429).json({ 
+        error: 'AI service is busy. Please wait a moment and try again.' 
+      })
     }
 
     res.status(500).json({ error: 'Failed to analyze meeting: ' + error.message })
