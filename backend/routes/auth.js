@@ -1,5 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const { googleAuth } = require("./../controllers/googleAuthController");
 const { register, login, refresh, logout } = require('../controllers/authController');
 const { authLimiter } = require('../middleware/rateLimiter');
 
@@ -48,6 +49,9 @@ router.post(
   validate,
   refresh
 );
+
+// Google OAuth
+router.post("/google", googleAuth);
 
 // Logout
 router.post('/logout', logout);
