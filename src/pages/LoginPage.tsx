@@ -115,7 +115,15 @@ export default function LoginPage() {
         },
       })
       // @ts-ignore
-      window.google.accounts.id.prompt()
+      window.google.accounts.id.renderButton(
+        document.getElementById('google-signin-btn'),
+        { 
+          theme: 'filled_black',
+          size: 'large',
+          width: '100%',
+          text: 'continue_with',
+        }
+      )
     } else {
       setError('Google Sign-In failed to load. Please refresh and try again.')
     }
@@ -290,6 +298,7 @@ export default function LoginPage() {
 
               {/* Google OAuth Button */}
               <button
+                id="google-signin-btn"
                 type="button"
                 onClick={handleGoogleSignIn}
                 className="w-full min-h-[52px] rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-colors bg-transparent border border-slate-800 hover:bg-white/5 active:scale-[0.98] flex items-center justify-center cursor-pointer"
