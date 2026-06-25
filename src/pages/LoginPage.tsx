@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   Bot, 
@@ -23,6 +23,7 @@ export default function LoginPage() {
   // Custom interactive state additions
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const googleInitialized = useRef(false)
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,35 +93,40 @@ export default function LoginPage() {
     }
     // @ts-ignore
     if (window.google) {
-      // @ts-ignore
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: async (response: any) => {
-          setLoading(true)
-          setError('')
-          try {
-            const res = await api.post('/auth/google', { token: response.credential })
-            const data = res.data || res
-            localStorage.setItem('token', data.accessToken)
-            localStorage.setItem('userName', data.user?.name || '')
-            localStorage.setItem('userEmail', data.user?.email || '')
-            localStorage.setItem('role', data.user?.role || 'member')
-            localStorage.setItem('initials', data.user?.avatar || 'GU')
-            navigate('/dashboard')
-          } catch (err: any) {
-            setError('Google Sign-In failed. Please try again.')
-          } finally {
-            setLoading(false)
-          }
-        },
-      })
+      if (!googleInitialized.current) {
+        // @ts-ignore
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response: any) => {
+            setLoading(true)
+            setError('')
+            try {
+              console.log('Google token received:', response.credential?.substring(0, 20))
+              const res = await api.post('/auth/google', { token: response.credential })
+              const data = res.data || res
+              localStorage.setItem('token', data.accessToken)
+              localStorage.setItem('userName', data.user?.name || '')
+              localStorage.setItem('userEmail', data.user?.email || '')
+              localStorage.setItem('role', data.user?.role || 'member')
+              localStorage.setItem('initials', data.user?.avatar || 'GU')
+              navigate('/dashboard')
+            } catch (err: any) {
+              console.error('Google auth error:', err)
+              setError('Google Sign-In failed. Please try again.')
+            } finally {
+              setLoading(false)
+            }
+          },
+        })
+        googleInitialized.current = true
+      }
       // @ts-ignore
       window.google.accounts.id.renderButton(
         document.getElementById('google-signin-btn'),
         { 
           theme: 'filled_black',
           size: 'large',
-          width: '100%',
+          width: 400,
           text: 'continue_with',
         }
       )
