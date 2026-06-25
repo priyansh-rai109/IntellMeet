@@ -31,16 +31,16 @@ const withRetry = async (fn, maxRetries = 3) => {
 async function callChatCompletion(params) {
   const openai = getClient()
   try {
-    // Try gpt-4 first with retry
+    // Try gpt-3.5-turbo first with retry
     return await withRetry(() => 
       openai.chat.completions.create({
         ...params,
-        model: 'gpt-4'
+        model: 'gpt-3.5-turbo'
       })
     )
   } catch (err) {
     if (err?.status === 429) {
-      console.warn('[AI] gpt-4 rate limited, falling back to gpt-3.5-turbo')
+      console.warn('[AI] gpt-3.5-turbo rate limited, falling back to gpt-3.5-turbo')
       // Fallback to gpt-3.5-turbo with retry
       return await withRetry(() => 
         openai.chat.completions.create({
