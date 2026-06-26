@@ -85,7 +85,7 @@ export default function AnalyticsPage() {
               <BarChart3 size={20} className="text-blue-500" />
               Team Analytics
             </h1>
-            <p className="text-sm text-slate-400 mt-0.5">Real-time productivity insights and meeting metrics</p>
+            <p className="text-sm text-gray-400 mt-0.5">Real-time productivity insights and meeting metrics</p>
           </div>
           <div className="flex items-center gap-2">
             {['This Week', 'This Month', 'Q2 Roadmap'].map((range) => (
@@ -94,8 +94,8 @@ export default function AnalyticsPage() {
                 onClick={() => setTimeRange(range)}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   timeRange === range
-                    ? 'text-white bg-blue-600 shadow-md'
-                    : 'text-slate-400 bg-white/5 border border-white/10 hover:bg-white/10'
+                    ? 'text-white bg-blue-600 shadow-lg'
+                    : 'text-gray-400 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {range}
@@ -113,13 +113,13 @@ export default function AnalyticsPage() {
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20">
                   <Clock size={18} className="text-blue-400" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-900/30 text-emerald-400">
+                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-955/40 border border-emerald-900/30 text-emerald-400">
                   <ArrowUpRight size={11} />
                   -2m vs last mo
                 </span>
               </div>
               <div className="text-3xl font-extrabold text-white mb-0.5">45 mins</div>
-              <div className="text-sm text-slate-400">Average Meeting Duration</div>
+              <div className="text-sm text-gray-400">Average Meeting Duration</div>
             </div>
 
             {/* Total Meetings Card */}
@@ -128,13 +128,13 @@ export default function AnalyticsPage() {
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/20">
                   <Calendar size={18} className="text-cyan-400" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-900/30 text-emerald-400">
+                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-955/40 border border-emerald-900/30 text-emerald-400">
                   <ArrowUpRight size={11} />
                   +12% vs last mo
                 </span>
               </div>
               <div className="text-3xl font-extrabold text-white mb-0.5">48</div>
-              <div className="text-sm text-slate-400">Total Meetings This Month</div>
+              <div className="text-sm text-gray-400">Total Meetings This Month</div>
             </div>
 
             {/* AI Time Saved Card */}
@@ -143,13 +143,13 @@ export default function AnalyticsPage() {
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20">
                   <Zap size={18} className="text-emerald-400" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-900/30 text-emerald-400">
+                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-955/40 border border-emerald-900/30 text-emerald-400">
                   <ArrowUpRight size={11} />
                   +23% vs last mo
                 </span>
               </div>
               <div className="text-3xl font-extrabold text-white mb-0.5">36 hrs</div>
-              <div className="text-sm text-slate-400">AI Time Saved</div>
+              <div className="text-sm text-gray-400">AI Time Saved</div>
             </div>
 
             {/* Collaboration Index */}
@@ -158,23 +158,26 @@ export default function AnalyticsPage() {
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/10 border border-amber-500/20">
                   <TrendingUp size={18} className="text-amber-400" />
                 </div>
-                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-900/30 text-emerald-400">
+                <span className="flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-955/40 border border-emerald-900/30 text-emerald-400">
                   Active
                 </span>
               </div>
               <div className="text-3xl font-extrabold text-white mb-0.5">94.8%</div>
-              <div className="text-sm text-slate-400">Task Completion Rate</div>
+              <div className="text-sm text-gray-400">Task Completion Rate</div>
             </div>
           </div>
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Meetings Bar Chart */}
-            <div className="bg-white/5 border border-white/8 backdrop-blur-xl rounded-2xl p-6 shadow-sm flex flex-col h-[350px]">
+            <div 
+              className="backdrop-blur-md rounded-2xl border p-6 flex flex-col h-[350px]" 
+              style={{ background: 'rgba(255, 255, 255, 0.04)', borderColor: 'rgba(255, 255, 255, 0.08)' }}
+            >
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-sm font-bold text-white">Total Meetings (Mon-Sun)</h2>
-                  <p className="text-xs text-slate-500">Total frequency distribution across weekdays</p>
+                  <p className="text-xs text-gray-400">Total frequency distribution across weekdays</p>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg">
                   <BarChart3 size={12} />
@@ -206,11 +209,14 @@ export default function AnalyticsPage() {
             </div>
 
             {/* AI Time Saved Line Chart */}
-            <div className="bg-white/5 border border-white/8 backdrop-blur-xl rounded-2xl p-6 shadow-sm flex flex-col h-[350px]">
+            <div 
+              className="backdrop-blur-md rounded-2xl border p-6 flex flex-col h-[350px]" 
+              style={{ background: 'rgba(255, 255, 255, 0.04)', borderColor: 'rgba(255, 255, 255, 0.08)' }}
+            >
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-sm font-bold text-white">AI Time Saved (Week 1-4)</h2>
-                  <p className="text-xs text-slate-500">Total estimated hours saved by auto-transcriptions</p>
+                  <p className="text-xs text-gray-400">Total estimated hours saved by auto-transcriptions</p>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg">
                   <Zap size={12} />
@@ -242,17 +248,20 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Top Contributors Card */}
-          <div className="bg-white/5 border border-white/8 backdrop-blur-xl rounded-2xl shadow-sm overflow-hidden">
+          <div 
+            className="backdrop-blur-md rounded-2xl border overflow-hidden shadow-2xl" 
+            style={{ background: 'rgba(255, 255, 255, 0.04)', borderColor: 'rgba(255, 255, 255, 0.08)' }}
+          >
             <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
               <div>
                 <h2 className="font-bold text-white text-base flex items-center gap-2">
                   <Award size={18} className="text-amber-400" />
                   Top Team Contributors
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Most active team members based on attendance and task completions</p>
+                <p className="text-xs text-gray-400 mt-0.5">Most active team members based on attendance and task completions</p>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold bg-white/5 border border-white/5 px-3 py-1 rounded-lg">
-                <Users size={12} className="text-slate-500" />
+              <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold bg-white/5 border border-white/5 px-3 py-1 rounded-lg">
+                <Users size={12} className="text-gray-400" />
                 Active contributors
               </div>
             </div>
@@ -260,11 +269,11 @@ export default function AnalyticsPage() {
               <table className="w-full text-left border-collapse text-sm">
                 <thead>
                   <tr className="bg-white/[0.01] border-b border-white/5">
-                    <th className="px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Member</th>
-                    <th className="px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider text-center">Meetings Attended</th>
-                    <th className="px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider text-center">Tasks Completed</th>
-                    <th className="px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Efficiency Index</th>
+                    <th className="px-6 py-4 font-semibold text-gray-400 text-xs uppercase tracking-wider">Member</th>
+                    <th className="px-6 py-4 font-semibold text-gray-400 text-xs uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-4 font-semibold text-gray-400 text-xs uppercase tracking-wider text-center">Meetings Attended</th>
+                    <th className="px-6 py-4 font-semibold text-gray-400 text-xs uppercase tracking-wider text-center">Tasks Completed</th>
+                    <th className="px-6 py-4 font-semibold text-gray-400 text-xs uppercase tracking-wider">Efficiency Index</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -281,9 +290,9 @@ export default function AnalyticsPage() {
                           </div>
                           <span className="font-semibold text-white">{c.name}</span>
                         </td>
-                        <td className="px-6 py-4 text-slate-400">{c.role}</td>
-                        <td className="px-6 py-4 font-bold text-slate-300 text-center">{c.meetings}</td>
-                        <td className="px-6 py-4 font-bold text-slate-300 text-center">{c.tasks}</td>
+                        <td className="px-6 py-4 text-gray-400">{c.role}</td>
+                        <td className="px-6 py-4 font-bold text-gray-300 text-center">{c.meetings}</td>
+                        <td className="px-6 py-4 font-bold text-gray-300 text-center">{c.tasks}</td>
                         <td className="px-6 py-4">
                           <span 
                             className="px-2.5 py-0.5 rounded-lg text-xs font-bold" 
