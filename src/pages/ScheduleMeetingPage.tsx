@@ -145,15 +145,15 @@ export default function ScheduleMeetingPage() {
           className="sticky top-0 z-30 px-8 py-5 flex items-center justify-between border-b"
           style={{ background: 'rgba(10, 15, 26, 0.85)', backdropFilter: 'blur(16px)', borderColor: 'rgba(255, 255, 255, 0.06)' }}
         >
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
             <button
               onClick={() => navigate('/dashboard')}
               className="hover:text-white transition-colors cursor-pointer"
             >
               Dashboard
             </button>
-            <ChevronRight size={12} className="text-slate-600" />
-            <span className="text-slate-400">Schedule Meeting</span>
+            <ChevronRight size={12} className="text-gray-600" />
+            <span className="text-gray-400">Schedule Meeting</span>
           </div>
         </div>
 
@@ -167,19 +167,22 @@ export default function ScheduleMeetingPage() {
               New Meeting
             </div>
             <h1 className="text-3xl font-black text-white mb-2">Schedule a Meeting</h1>
-            <p className="text-slate-400 text-sm">Set up your next team meeting with all the details below.</p>
+            <p className="text-gray-400 text-sm">Set up your next team meeting with all the details below.</p>
           </div>
 
           {/* Form Card */}
           <form onSubmit={handleSubmit} noValidate>
-            <div className="bg-white/5 border border-white/8 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl">
+            <div 
+              className="backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border" 
+              style={{ background: 'rgba(255, 255, 255, 0.04)', borderColor: 'rgba(255, 255, 255, 0.08)' }}
+            >
               {/* Top Accent Line */}
-              <div className="h-1 w-full bg-gradient-to-r from-blue-500 to-purple-500" />
+              <div className="h-1 w-full bg-gradient-to-r from-blue-600 to-purple-600" />
 
               <div className="p-8 space-y-6">
                 {/* Title */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-2" htmlFor="meeting-title">
+                  <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="meeting-title">
                     <span className="flex items-center gap-2">
                       <FileText size={13} className="text-blue-500" />
                       Meeting Title <span className="text-red-400">*</span>
@@ -191,12 +194,11 @@ export default function ScheduleMeetingPage() {
                     placeholder="e.g. Q3 Product Roadmap Review"
                     value={form.title}
                     onChange={e => handleChange('title', e.target.value)}
-                    className={`w-full px-4 py-3.5 rounded-xl border text-sm text-white placeholder-slate-600 outline-none transition-all duration-200 focus:ring-2 ${
+                    className={`w-full px-4 min-h-[52px] rounded-xl border text-sm text-white placeholder-gray-600 outline-none transition-all duration-200 bg-white/5 focus:ring-2 ${
                       errors.title
                         ? 'border-red-500/50 focus:ring-red-500/20'
                         : 'border-white/10 focus:ring-blue-500/20 focus:border-blue-500'
                     }`}
-                    style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                   />
                   {errors.title && (
                     <p className="mt-1.5 text-xs font-semibold flex items-center gap-1 text-red-400">
@@ -208,7 +210,7 @@ export default function ScheduleMeetingPage() {
                 {/* Date & Time */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-2" htmlFor="meeting-date">
+                    <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="meeting-date">
                       <span className="flex items-center gap-2">
                         <Calendar size={13} className="text-blue-500" />
                         Date <span className="text-red-400">*</span>
@@ -220,12 +222,11 @@ export default function ScheduleMeetingPage() {
                       value={form.date}
                       min={todayStr}
                       onChange={e => handleChange('date', e.target.value)}
-                      className={`w-full px-4 py-3.5 rounded-xl border text-sm text-white outline-none transition-all duration-200 focus:ring-2 ${
+                      className={`w-full px-4 min-h-[52px] rounded-xl border text-sm text-white outline-none transition-all duration-200 bg-white/5 focus:ring-2 ${
                         errors.date
                           ? 'border-red-500/50 focus:ring-red-500/20'
                           : 'border-white/10 focus:ring-blue-500/20 focus:border-blue-500'
                       }`}
-                      style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                     />
                     {errors.date && (
                       <p className="mt-1.5 text-xs font-semibold flex items-center gap-1 text-red-400">
@@ -235,7 +236,7 @@ export default function ScheduleMeetingPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-2" htmlFor="meeting-time">
+                    <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="meeting-time">
                       <span className="flex items-center gap-2">
                         <Clock size={13} className="text-blue-500" />
                         Time <span className="text-red-400">*</span>
@@ -246,12 +247,11 @@ export default function ScheduleMeetingPage() {
                       type="time"
                       value={form.time}
                       onChange={e => handleChange('time', e.target.value)}
-                      className={`w-full px-4 py-3.5 rounded-xl border text-sm text-white outline-none transition-all duration-200 focus:ring-2 ${
+                      className={`w-full px-4 min-h-[52px] rounded-xl border text-sm text-white outline-none transition-all duration-200 bg-white/5 focus:ring-2 ${
                         errors.time
                           ? 'border-red-500/50 focus:ring-red-500/20'
                           : 'border-white/10 focus:ring-blue-500/20 focus:border-blue-500'
                       }`}
-                      style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                     />
                     {errors.time && (
                       <p className="mt-1.5 text-xs font-semibold flex items-center gap-1 text-red-400">
@@ -263,7 +263,7 @@ export default function ScheduleMeetingPage() {
 
                 {/* Duration pills */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-2">
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
                     <span className="flex items-center gap-2">
                       <Timer size={13} className="text-blue-500" />
                       Duration <span className="text-red-400">*</span>
@@ -279,7 +279,7 @@ export default function ScheduleMeetingPage() {
                         className={`px-3 py-3 rounded-xl text-xs font-bold border transition-all duration-200 cursor-pointer ${
                           form.duration === opt.value
                             ? 'text-white border-blue-600 bg-blue-600'
-                            : 'text-slate-400 border-white/10 hover:border-slate-500 hover:text-white bg-white/5'
+                            : 'text-gray-400 border-white/10 hover:border-slate-500 hover:text-white bg-white/5'
                         }`}
                       >
                         {opt.label}
@@ -290,7 +290,7 @@ export default function ScheduleMeetingPage() {
 
                 {/* Participants */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-2" htmlFor="meeting-participants">
+                  <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="meeting-participants">
                     <span className="flex items-center gap-2">
                       <Users size={13} className="text-blue-500" />
                       Participants
@@ -303,15 +303,14 @@ export default function ScheduleMeetingPage() {
                     placeholder="alice@example.com, bob@example.com"
                     value={form.participants}
                     onChange={e => handleChange('participants', e.target.value)}
-                    className={`w-full px-4 py-3.5 rounded-xl border text-sm text-white placeholder-slate-600 outline-none transition-all duration-200 focus:ring-2 ${
+                    className={`w-full px-4 min-h-[52px] rounded-xl border text-sm text-white placeholder-gray-600 outline-none transition-all duration-200 bg-white/5 focus:ring-2 ${
                       errors.participants
                         ? 'border-red-500/50 focus:ring-red-500/20'
                         : 'border-white/10 focus:ring-blue-500/20 focus:border-blue-500'
                     }`}
-                    style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                   />
                   {form.participants.trim() && !errors.participants && (
-                    <p className="mt-1.5 text-xs text-slate-500 font-medium">
+                    <p className="mt-1.5 text-xs text-gray-500 font-medium">
                       {form.participants.split(',').filter(e => e.trim()).length} participant(s)
                     </p>
                   )}
@@ -324,7 +323,7 @@ export default function ScheduleMeetingPage() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-widest mb-2" htmlFor="meeting-description">
+                  <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="meeting-description">
                     <span className="flex items-center gap-2">
                       <AlignLeft size={13} className="text-blue-500" />
                       Description
@@ -337,7 +336,7 @@ export default function ScheduleMeetingPage() {
                     placeholder="Share the agenda or any relevant context…"
                     value={form.description}
                     onChange={e => handleChange('description', e.target.value)}
-                    className="w-full px-4 py-3.5 rounded-xl border border-white/10 text-sm text-white placeholder-slate-600 outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none bg-white/5"
+                    className="w-full px-4 py-3.5 rounded-xl border border-white/10 text-sm text-white placeholder-gray-600 outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none bg-white/5"
                   />
                 </div>
               </div>
@@ -347,7 +346,7 @@ export default function ScheduleMeetingPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 border border-white/10 hover:bg-white/5 transition-all duration-150 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-gray-400 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-150 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -355,8 +354,7 @@ export default function ScheduleMeetingPage() {
                   id="schedule-meeting-submit"
                   type="submit"
                   disabled={loading}
-                  className="glow-btn-blue flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-bold text-xs transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 cursor-pointer"
-                  style={{ background: '#3b82f6' }}
+                  className="glow-btn-blue flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-bold text-xs transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 cursor-pointer bg-blue-600 hover:bg-blue-500"
                 >
                   {loading ? (
                     <>
