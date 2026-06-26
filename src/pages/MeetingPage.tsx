@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
   Mic, MicOff, Video, VideoOff, Monitor, Hand, Circle,
   PhoneOff, Bot, Send, Users, Wifi, WifiOff, MoreVertical,
-  MessageSquare, UserCircle2, Link,
+  MessageSquare, UserCircle2, Link, X
 } from 'lucide-react'
 import { useSocket } from '../hooks/useSocket'
 import { useWebRTC } from '../hooks/useWebRTC'
@@ -126,6 +126,8 @@ export default function MeetingPage() {
   const [hasJoined, setHasJoined] = useState(false)
   const [streamError, setStreamError] = useState(false)
   const [showInviteToast, setShowInviteToast] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [showParticipants, setShowParticipants] = useState(false)
 
   const chatEndRef = useRef<HTMLDivElement>(null)
   const localVideoRef = useRef<HTMLVideoElement | null>(null)
@@ -399,49 +401,100 @@ export default function MeetingPage() {
       )}
 
       {/* Global Socket reconnect banner */}
-      {!isConnected && <ConnectionStatusAlert type="socket" />}
+      {/* Participant Overlay Modal (Mobile only) */}
+      {showParticipants && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 md:hidden animate-fade-in">
+          <div className="w-full max-w-sm rounded-2xl p-6 border border-white/10 bg-[#161B22] shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Users size={18} className="text-purple-400" />
+                <h3 className="text-white font-bold text-sm">Participants ({totalCount})</h3>
+              </div>
+              <button 
+                onClick={() => setShowParticipants(false)} 
+                className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              {/* Local user */}
+              <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <div className="relative flex-shrink-0">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: userColor }}>
+                    {userInitials}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-gray-900" />
+                </div>
+                <span className="text-white/80 text-xs font-semibold flex-1 truncate">{userName}</span>
+                <span className="text-xs text-emerald-400 font-semibold">You</span>
+              </div>
 
+              {/* Remote participants */}
+              {participants.map(p => {
+                const pColor = getColorFromName(p.userName)
+                const pInit = getInitials(p.userName)
+                const hasPeer = peers.some(peer => peer.socketId === p.socketId)
+                return (
+                  <div key={p.socketId} className="flex items-center gap-2 px-2.5 py-2 rounded-xl transition-colors" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <div className="relative flex-shrink-0">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: pColor }}>
+                        {pInit}
+                      </div>
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-gray-900 ${hasPeer ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                    </div>
+                    <span className="text-white/70 text-xs font-semibold flex-1 truncate">{p.userName}</span>
+                    {typingUsers[p.socketId] && (
+                      <span className="text-xs text-purple-400 italic">typing…</span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Top Bar ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#161B22' }}>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between px-4 py-2.5 sm:px-6 sm:py-3 border-b gap-2" style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#161B22' }}>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center cursor-pointer flex-shrink-0"
               onClick={() => navigate('/dashboard')}
               style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
             >
-              <Bot size={16} className="text-white" />
+              <Bot className="text-white w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </div>
-            <span className="text-white font-bold text-sm cursor-pointer hover:opacity-85" onClick={() => navigate('/dashboard')}>IntellMeet</span>
+            <span className="text-white font-bold text-xs sm:text-sm cursor-pointer hover:opacity-85" onClick={() => navigate('/dashboard')}>IntellMeet</span>
           </div>
-          <div className="h-4 w-px bg-white/10" />
-          <div className="flex items-center gap-2.5">
-            <span className="text-white font-semibold text-sm truncate max-w-48">
+          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline text-white font-semibold text-xs sm:text-sm truncate max-w-[120px] sm:max-w-[200px]">
               Room · {roomId.length > 8 ? `${roomId.substring(0, 8)}...` : roomId}
             </span>
             <button
               onClick={handleInviteCopy}
-              className="bg-white/10 hover:bg-white/15 text-white text-xs rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="bg-white/10 hover:bg-white/15 text-white text-[10px] sm:text-xs rounded-lg px-2.5 py-1.5 flex items-center gap-1 sm:gap-1.5 transition-colors cursor-pointer min-h-[32px] sm:min-h-0"
             >
-              <Link size={12} />
+              <Link className="w-3 h-3" />
               Invite
             </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {/* Timer */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg bg-white/5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-white font-mono text-sm font-semibold">{timer}</span>
+            <span className="text-white font-mono text-xs sm:text-sm font-semibold">{timer}</span>
           </div>
 
           {/* REC badge */}
           {recording && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }}>
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-red-400 text-xs font-bold">REC</span>
+            <div className="flex items-center gap-1 px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }}>
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-red-400 text-[10px] sm:text-xs font-bold">REC</span>
             </div>
           )}
 
@@ -451,31 +504,34 @@ export default function MeetingPage() {
             <span className="text-xs font-semibold" style={{ color: '#A78BFA' }}>AI Transcribing</span>
           </div>
 
-          {/* Participant count */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <Users size={12} className="text-slate-400" />
+          {/* Participant count (toggles overlay on mobile) */}
+          <div 
+            onClick={() => setShowParticipants(v => !v)}
+            className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+          >
+            <Users className="text-slate-400 w-3.5 h-3.5" />
             <span className="text-white text-xs font-semibold">{totalCount}</span>
           </div>
 
           {/* Connection indicator */}
           <div className="flex items-center gap-1">
             {isConnected
-              ? <Wifi size={14} className="text-emerald-400" />
-              : <WifiOff size={14} className="text-red-400 animate-pulse" />
+              ? <Wifi className="text-emerald-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              : <WifiOff className="text-red-400 animate-pulse w-3.5 h-3.5 sm:w-4 sm:h-4" />
             }
           </div>
         </div>
       </div>
 
       {/* ── Content ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
 
         {/* ── Video Area ────────────────────────────────────────────────── */}
-        <div className="flex-1 flex flex-col p-4 gap-3 overflow-hidden">
+        <div className="flex-1 flex flex-col p-2 sm:p-4 gap-2 sm:gap-3 overflow-y-auto md:overflow-hidden">
 
           {/* Main tile (local user) */}
           <div
-            className="flex-1 rounded-2xl flex items-center justify-center relative min-h-0 overflow-hidden"
+            className="flex-shrink-0 w-full h-[50vh] md:h-auto md:flex-1 rounded-2xl flex items-center justify-center relative overflow-hidden"
             style={{ border: '2px solid rgba(124,58,237,0.4)', background: '#0a0d12' }}
           >
             {localStream && camOn ? (
@@ -483,12 +539,12 @@ export default function MeetingPage() {
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <div
-                  className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-2xl"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold text-white shadow-2xl"
                   style={{ background: `linear-gradient(135deg, ${userColor}, ${userColor}aa)` }}
                 >
                   {userInitials}
                 </div>
-                <div className="text-white font-semibold text-lg">{userName}</div>
+                <div className="text-white font-semibold text-sm sm:text-lg">{userName}</div>
                 {streamError && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}>
                     <VideoOff size={12} className="text-amber-400" />
@@ -498,7 +554,7 @@ export default function MeetingPage() {
                 {!streamError && (
                   <div className="flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: 'rgba(124,58,237,0.3)', border: '1px solid rgba(124,58,237,0.5)' }}>
                     <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                    <span className="text-purple-300 text-sm font-medium">You · Speaking</span>
+                    <span className="text-purple-300 text-xs sm:text-sm font-medium">You · Speaking</span>
                   </div>
                 )}
               </div>
@@ -527,7 +583,7 @@ export default function MeetingPage() {
 
           {/* Remote peer tiles */}
           {peers.length > 0 && (
-            <div className={`grid gap-3 h-32 ${peers.length === 1 ? 'grid-cols-1' : peers.length <= 3 ? `grid-cols-${peers.length}` : 'grid-cols-4'}`}
+            <div className={`grid gap-2 h-24 md:h-32 flex-shrink-0 ${peers.length === 1 ? 'grid-cols-1' : peers.length <= 3 ? `grid-cols-${peers.length}` : 'grid-cols-4'}`}
               style={{ gridTemplateColumns: `repeat(${Math.min(peers.length, 4)}, 1fr)` }}
             >
               {peers.map(peer => {
@@ -543,18 +599,18 @@ export default function MeetingPage() {
                       <RemoteVideo stream={peer.stream} userName={peer.userName} color={pColor} />
                     ) : (
                       <>
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white"
                           style={{ background: `linear-gradient(135deg, ${pColor}, ${pColor}aa)` }}>
                           {pInit}
                         </div>
-                        <span className="text-white/70 text-xs font-medium truncate px-1 w-full text-center">
+                        <span className="text-white/70 text-[10px] sm:text-xs font-medium truncate px-1 w-full text-center">
                           {peer.userName.split(' ')[0]}
                         </span>
                       </>
                     )}
                     {/* Name overlay for video tile */}
                     {peer.stream && (
-                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-xs text-white font-medium"
+                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs text-white font-medium"
                         style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>
                         {peer.userName.split(' ')[0]}
                       </div>
@@ -577,20 +633,25 @@ export default function MeetingPage() {
 
           {/* Empty state — waiting for others */}
           {peers.length === 0 && isConnected && (
-            <div className="h-20 rounded-xl flex items-center justify-center gap-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <div className="h-20 rounded-xl flex items-center justify-center gap-3 flex-shrink-0" style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)' }}>
               <UserCircle2 size={18} className="text-slate-500" />
-              <span className="text-slate-500 text-sm">Waiting for others to join…</span>
+              <span className="text-slate-500 text-xs sm:text-sm">Waiting for others to join…</span>
             </div>
           )}
         </div>
 
-        {/* ── Right Panel ───────────────────────────────────────────────── */}
-        <div className="w-80 flex flex-col border-l" style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#161B22' }}>
-
-          {/* Panel tabs — Participants */}
-          <div className="px-4 pt-3 pb-0">
+        {/* ── Right Panel (Chat Sidebar) ───────────────────────────────────────────────── */}
+        <div 
+          className={`flex-col border-l border-white/10 ${
+            showChat 
+              ? 'fixed bottom-0 left-0 w-full h-80 md:h-auto z-40 bg-[#161B22] border-t' 
+              : 'hidden'
+          } md:flex md:static md:w-72 md:bg-[#161B22]`}
+        >
+          {/* Panel tabs — Participants (Desktop only) */}
+          <div className="hidden md:block px-4 pt-3 pb-0">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer" style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.35)' }}>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.35)' }}>
                 <Users size={13} style={{ color: '#A78BFA' }} />
                 <span className="text-xs font-semibold" style={{ color: '#A78BFA' }}>
                   {totalCount} Participant{totalCount !== 1 ? 's' : ''}
@@ -639,12 +700,20 @@ export default function MeetingPage() {
             </div>
           </div>
 
-          <div className="h-px mx-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          <div className="hidden md:block h-px mx-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
 
           {/* Chat header */}
-          <div className="px-4 py-2 flex items-center gap-2">
-            <Bot size={14} style={{ color: '#A78BFA' }} />
-            <span className="text-white text-xs font-semibold">Live Chat</span>
+          <div className="px-4 py-2 flex items-center justify-between border-b border-white/5 md:border-b-0">
+            <div className="flex items-center gap-2">
+              <Bot size={14} style={{ color: '#A78BFA' }} />
+              <span className="text-white text-xs font-semibold">Live Chat</span>
+            </div>
+            <button 
+              onClick={() => setShowChat(false)}
+              className="md:hidden text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5 cursor-pointer"
+            >
+              <X size={16} />
+            </button>
           </div>
 
           {/* Messages */}
@@ -696,7 +765,7 @@ export default function MeetingPage() {
           </div>
 
           {/* Chat Input */}
-          <div className="px-4 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <div className="px-4 py-3 border-t border-white/10" style={{ background: '#161B22' }}>
             <form onSubmit={sendMessage} className="flex gap-2">
               <input
                 id="chat-input"
@@ -705,7 +774,7 @@ export default function MeetingPage() {
                 placeholder="Type a message…"
                 disabled={!isConnected}
                 className="flex-1 px-3 py-2 rounded-xl text-xs text-white placeholder-white/25 outline-none disabled:opacity-40"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
               />
               <button
                 type="submit"
@@ -721,7 +790,7 @@ export default function MeetingPage() {
       </div>
 
       {/* ── Bottom Controls ──────────────────────────────────────────────── */}
-      <div className="flex items-center justify-center gap-3 px-6 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#161B22' }}>
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 border-t border-white/10" style={{ background: '#161B22' }}>
         {[
           {
             id: 'btn-mic', icon: micOn ? Mic : MicOff, label: micOn ? 'Mute' : 'Unmute',
@@ -753,30 +822,44 @@ export default function MeetingPage() {
             activeColor: 'rgba(239,68,68,0.2)', inactiveColor: 'rgba(255,255,255,0.1)',
             activeIcon: recording ? 'text-red-400' : 'text-white',
           },
-        ].map(({ id, icon: Icon, label, active, onClick, activeColor, inactiveColor, activeIcon }) => (
+          {
+            id: 'btn-participants', icon: Users, label: 'People',
+            active: showParticipants, onClick: () => setShowParticipants(v => !v),
+            activeColor: 'rgba(124,58,237,0.2)', inactiveColor: 'rgba(255,255,255,0.1)',
+            activeIcon: showParticipants ? 'text-purple-400' : 'text-white',
+            className: 'md:hidden',
+          },
+          {
+            id: 'btn-chat', icon: MessageSquare, label: showChat ? 'Hide Chat' : 'Chat',
+            active: showChat, onClick: () => setShowChat(v => !v),
+            activeColor: 'rgba(124,58,237,0.2)', inactiveColor: 'rgba(255,255,255,0.1)',
+            activeIcon: showChat ? 'text-purple-400' : 'text-white',
+            className: 'md:hidden',
+          },
+        ].map(({ id, icon: Icon, label, active, onClick, activeColor, inactiveColor, activeIcon, className }) => (
           <button
             key={id}
             id={id}
             onClick={onClick}
-            className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 min-w-16 cursor-pointer"
+            className={`flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 min-w-[60px] sm:min-w-[72px] cursor-pointer ${className || ''}`}
             style={{ background: active ? activeColor : inactiveColor }}
           >
-            <Icon size={20} className={activeIcon} />
-            <span className={`text-xs font-medium ${activeIcon}`}>{label}</span>
+            <Icon className={`${activeIcon} w-4 h-4 sm:w-5 sm:h-5`} />
+            <span className={`text-[10px] sm:text-xs font-medium ${activeIcon}`}>{label}</span>
           </button>
         ))}
 
-        <div className="w-px h-10 mx-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
+        <div className="hidden sm:block w-px h-10 mx-1 bg-white/10" />
 
         {/* Leave */}
         <button
           id="btn-leave"
           onClick={leaveMeeting}
-          className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+          className="flex flex-col items-center gap-1 p-2 sm:px-4 sm:py-3 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer min-w-[60px] sm:min-w-[72px]"
           style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)' }}
         >
-          <PhoneOff size={20} className="text-red-400" />
-          <span className="text-xs font-medium text-red-400">Leave</span>
+          <PhoneOff className="text-red-400 w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="text-[10px] sm:text-xs font-medium text-red-400">Leave</span>
         </button>
       </div>
     </div>
