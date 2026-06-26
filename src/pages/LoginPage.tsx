@@ -5,9 +5,6 @@ import {
   Mail, 
   Lock, 
   ArrowRight, 
-  Sparkles, 
-  Shield, 
-  Zap, 
   Eye, 
   EyeOff 
 } from 'lucide-react'
@@ -168,22 +165,6 @@ export default function LoginPage() {
           backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
           backgroundSize: '80px 80px'
         }} />
-      </div>
-
-      {/* Feature badges row */}
-      <div className="w-full max-w-md mb-8 flex justify-center">
-        <div className="flex gap-3 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap max-w-full px-4 py-2 justify-start md:justify-center">
-          {[
-            { icon: Zap, text: 'Real-time Transcription' },
-            { icon: Shield, text: 'Enterprise Secure' },
-            { icon: Sparkles, text: 'AI Summaries' },
-          ].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-400 border border-slate-800 bg-slate-950/40 backdrop-blur-sm flex-shrink-0">
-              <Icon size={12} className="text-blue-400" />
-              {text}
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Main Login Card */}
