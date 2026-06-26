@@ -52,7 +52,7 @@ This file serves as the core system and architectural context for IntellMeet, de
   - `TasksPage.tsx` ✅ (Dark kanban board)
   - `SettingsPage.tsx` ✅ (Dark theme)
   - `MeetingPage.tsx` ✅ (WebRTC/Socket controls, **fully mobile responsive**)
-  - `ScheduleMeetingPage.tsx` ⏳ (Dark theme styling pending)
+  - `ScheduleMeetingPage.tsx` ✅ (Dark theme)
   - `AnalyticsPage.tsx` ⏳ (Dark theme styling pending)
 - `src/components/`
   - `Sidebar.tsx` ✅ (Blue active states, no purple)
@@ -122,7 +122,6 @@ GOOGLE_CLIENT_SECRET=GOCSPX-...
 - UptimeRobot setup pings backend `/health` every 5 mins to prevent Render cold starts.
 
 ### Pending/In-Progress:
-- [ ] Dark theme refinement on `ScheduleMeetingPage.tsx`
 - [ ] Dark theme refinement on `AnalyticsPage.tsx`
 - [ ] Screen share (`getDisplayMedia`) logic integration
 - [ ] Account picker configuration for Google OAuth
